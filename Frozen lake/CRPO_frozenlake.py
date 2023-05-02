@@ -163,8 +163,8 @@ def sample_trajectories(env, gamma, beta, episodes, length, policy_model, qtable
         done = False
         hole = False
         
-        while not done:
-        # while length_so_far < length:
+        while not done and length_so_far < length:
+
           states.append(state)
           
           action = sample_actions(state, policy_model)
@@ -211,9 +211,9 @@ def sample_trajectories(env, gamma, beta, episodes, length, policy_model, qtable
               else:    # Update the policy to minimize the cost
                 policy_model = policy_model - alpha*(qtable_cost/(1-gamma))
 
-          # length_so_far += 1
+          length_so_far += 1
         
-
+        
         path = {"observations": states,
                 "actions": actions,
                 "rewards": rewards,
@@ -231,7 +231,14 @@ def sample_trajectories(env, gamma, beta, episodes, length, policy_model, qtable
     # discounted_costs2 = flatten([math_utils.discount(path["costs2"], gamma) for path in paths])
     # total_cost2 = sum(flatten([path["costs2"] for path in paths])) / episodes
 
+    discounted_total_reward= 0
+    for path in [path["rewards"] for path in paths]:
+      discounted_total_reward_tem=0
+      for j,reward in enumerate(path):
+          discounted_total_reward_tem+=reward*(gamma**j)
+      discounted_total_reward+= discounted_total_reward_tem
+    discounted_total_reward=discounted_total_reward/episodes
 
     actions = flatten([path["actions"] for path in paths])
 
-    return total_reward, total_cost, policy_model, qtable_reward, qtable_cost
+    return discounted_total_reward, total_cost, policy_model, qtable_reward, qtable_cost

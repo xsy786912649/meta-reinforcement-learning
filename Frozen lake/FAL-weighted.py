@@ -25,8 +25,8 @@ def sample_trajectories_wo_update(env, gamma, beta, episodes, length, policy_mod
         done = False
         hole = False
         
-        while not done:
-        # while length_so_far < length:
+        while not done and length_so_far < length:
+        # while :
           states.append(state)
           action = sample_actions(state, policy_model)
           new_state, done, hole = step(action, env)
@@ -57,6 +57,8 @@ def sample_trajectories_wo_update(env, gamma, beta, episodes, length, policy_mod
             states.append(state)
             # alpha = alpha/(k**2)
             state,_ = env.reset()
+
+          length_so_far+=1
 
         path = {"observations": states,
                 "actions": actions,
@@ -111,8 +113,6 @@ def get_weighted_policy(policies_arr, w, num_tasks):
 
 
 
-
-
 def main(num_tasks, policies, w):
     # map_name = generate_random_map()
     # Giving a custom map
@@ -124,7 +124,7 @@ def main(num_tasks, policies, w):
     nS=4*4
     # Backward=backward_state(eps,nA,nS)
     
-    env = gym.make("FrozenLake-v1",desc= map_name, is_slippery=True)
+    env = gym.make("FrozenLake-v1",desc= map_name, is_slippery=False)
     # Unsafe_states, Unsafe_actions=unsafe_states_actions(env,Backward)
     # np.save('map'+str(num_tasks)+'.npy', map_name)
 
@@ -132,9 +132,9 @@ def main(num_tasks, policies, w):
     beta = 0.3    # value function learning rate for the critic
     gamma = 0.98             # Discount factor
     episodes = 10 #10        
-    length = 100  #50       # Length of the sample trajectories, maybe we can change this
+    length = 1000  #50       # Length of the sample trajectories, maybe we can change this
 
-    STEP = 2
+    STEP = 20
 
     # Set the threshold
     d_threshold = 0.3
@@ -154,7 +154,7 @@ def main(num_tasks, policies, w):
       # Get the weighted average policy
 
       # Get the learning rate for this specific task
-      M = STEP*episodes
+      M = 20*episodes
       a= np.sqrt(1/num_tasks)
       b = np.sqrt(np.sqrt(1/M))
       # kl_divergence = np.mean(kl_data)
@@ -178,7 +178,8 @@ def main(num_tasks, policies, w):
                                                                                          policy_model, qtable_reward, qtable_cost, 
                                                                                          d_threshold, N_0, alpha)
 
-      # print(result)
+      #print(result)
+      
       
       policy_model = policy_model_out
       qtable_cost = cost_model
@@ -216,12 +217,13 @@ def main(num_tasks, policies, w):
     plt.ylabel('Reward/Cost')
     plt.title('Task'+str(num_tasks))
     # plt.savefig('books_read.png')
-    # plt.show()
+    plt.show()
     np.save('maps/Training_task_data/rewards'+str(num_tasks)+'.npy',results)
     np.save('maps/Training_task_data/costs'+str(num_tasks)+'.npy',violations)
 
     _, _, _, observations = sample_trajectories_wo_update(env, gamma, beta, 300, length,
                                                           policy_model_out, qtable_reward, qtable_cost, d_threshold, N_0, alpha)
+    
 
     # Compute the weights for the weighted average
     weights = get_weights(observations)
@@ -237,7 +239,7 @@ for i in range(num_tasks):
     policy_model_out, weights, results, violations = main(i+1, policies, w)
     # print(i)
     w.append(weights)
-    policies.append(policy_model_out)
+    #policies.append(policy_model_out)
 
     # Run the policy on the test task for 10 runs to get the variance plots
     if (i+1) == num_tasks:

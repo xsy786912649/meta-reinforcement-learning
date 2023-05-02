@@ -140,23 +140,23 @@ def update_probability_matrix(row, col, action):
             return newstate
 def to_s(row, col):
             return row * 4 + col
-def backward_state(eps,nA,nS):
+def backward_state(eps,nA,nS,is_slippery=True):
     P={s: {a: [] for a in range(nA)} for s in range(nS)}
     for row in range(4):
             for col in range(4):
                 s = to_s(row, col)
                 for a in range(4):
                     li = P[s][a]
-                    # if is_slippery:
+                    if is_slippery:
                     # letter = desc[row, col]
-                    if  row==3 and col==3:
-                        li.append((1.0, s))
-                    for b in [(a - 1) % 4, a, (a + 1) % 4]:
-                        li.append(
-                            (1.0 / 3.0, update_probability_matrix(row, col, b))
-                        )
-                    # else:
-                    #     li.append((1.0, *update_probability_matrix(row, col, a)))
+                        if  row==3 and col==3:
+                            li.append((1.0, s))
+                        for b in [(a - 1) % 4, a, (a + 1) % 4]:
+                            li.append(
+                                (1.0 / 3.0, update_probability_matrix(row, col, b))
+                            )
+                    else:
+                        li.append((1.0, update_probability_matrix(row, col, a)))
 
     Backward={s: {a: set() for a in range(nA)} for s in range(nS)}
     for s in P.keys():
@@ -278,7 +278,6 @@ def sample_trajectories(env, gamma, beta, episodes, length, policy_model, qtable
     
     while episodes_so_far < episodes:
         k += 1
-        
         episodes_so_far += 1
         states, actions, rewards, costs = [], [], [], 0
         state_action_buffer = []
@@ -305,7 +304,7 @@ def sample_trajectories(env, gamma, beta, episodes, length, policy_model, qtable
           rewards.append(reward)
           if hole:
               costs =1
-              print(state, new_state, states)
+              # print(state, new_state, states)
               
               # _,_ = sample_actions(state, policy_model, Unsafe_states, Unsafe_actions,eps,pr=True)
               
@@ -348,7 +347,7 @@ def sample_trajectories(env, gamma, beta, episodes, length, policy_model, qtable
                 "costs": costs}
         # print(path["costs"])
         paths.append(path)
-
+        #print(states,actions)
         
 
     observations = flatten([path["observations"] for path in paths])
@@ -359,8 +358,16 @@ def sample_trajectories(env, gamma, beta, episodes, length, policy_model, qtable
     total_cost = sum([path["costs"] for path in paths]) / episodes
     # discounted_costs2 = flatten([math_utils.discount(path["costs2"], gamma) for path in paths])
     # total_cost2 = sum(flatten([path["costs2"] for path in paths])) / episodes
-
+    
+    discounted_total_reward= 0
+    for path in [path["rewards"] for path in paths]:
+      discounted_total_reward_tem=0
+      for j,reward in enumerate(path):
+          discounted_total_reward_tem+=reward*(gamma**j)
+      discounted_total_reward+= discounted_total_reward_tem
+    discounted_total_reward=discounted_total_reward/episodes
 
     actions = flatten([path["actions"] for path in paths])
 
-    return total_reward, total_cost, policy_model, qtable_reward, qtable_cost
+    return discounted_total_reward, total_cost, policy_model, qtable_reward, qtable_cost
+

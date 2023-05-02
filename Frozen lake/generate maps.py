@@ -79,6 +79,8 @@ def is_valid(res):
 
 m=None
 for i in range(100):
-    m=generate_random_markov_map(m,size=4, p=0.3+0.035*i)
+    m=generate_random_map(size=4, p=0.8)
+    #m=generate_random_markov_map(m,size=4, p=0.3+0.035*i)
     with open('maps/map'+str(i)+'.npy', 'wb') as f:
         np.save(f,m)
+

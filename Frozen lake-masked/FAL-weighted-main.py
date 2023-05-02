@@ -25,8 +25,8 @@ def sample_trajectories_wo_update(env, gamma, beta, episodes, length, policy_mod
         done = False
         hole = False
         
-        while not done:
-        # while length_so_far < length:
+        while not done and length_so_far < length:
+          length_so_far+=1
           states.append(state)
           action,_ = sample_actions(state, policy_model,Unsafe_states, Unsafe_actions,eps)
           new_state, done, hole = step(action, env)
@@ -124,22 +124,22 @@ def main(num_tasks, policies, w,eps,episodes):
     # eps=0.15
     nA=4
     nS=4*4
-    Backward=backward_state(eps,nA,nS)
+    Backward=backward_state(eps,nA,nS,False)
     
-    env = gym.make("FrozenLake-v1",desc= map_name, is_slippery=True)
+    env = gym.make("FrozenLake-v1",desc= map_name, is_slippery=False)
     Unsafe_states, Unsafe_actions=unsafe_states_actions(env,Backward)
     # np.save('map'+str(num_tasks)+'.npy', map_name)
 
     ## Hyperparameter
     beta = 0.3    # value function learning rate for the critic
-    gamma = 0.98             # Discount factor
-    # episodes = 10 #10        
+    gamma = 0.9             # Discount factor
+    episodes = 10 #10        
     length = 100  #50       # Length of the sample trajectories, maybe we can change this
 
-    STEP = 2
+    STEP = 20
     H = 100
     print('epsilon = ', eps, 'H = ', H)
-    eps = eps/100
+    eps = eps/length
     # Set the threshold
     d_threshold = 0.3
 
@@ -177,6 +177,7 @@ def main(num_tasks, policies, w,eps,episodes):
     result_avg = 0
     violation_avg = 0
     
+    print(map_name)
     for iteration in range(STEP):
       
       result, violation, policy_model_out, value_model, cost_model = sample_trajectories(env, gamma, beta, episodes, length,
@@ -184,7 +185,6 @@ def main(num_tasks, policies, w,eps,episodes):
                                                                                          d_threshold, N_0, alpha,
                                                                                          Unsafe_states, Unsafe_actions,eps,H)
 
-      
       
       policy_model = policy_model_out
       qtable_cost = cost_model
@@ -234,53 +234,57 @@ def main(num_tasks, policies, w,eps,episodes):
 
     return policy_model_out, weights, results, violations
 
-num_tasks =2
 
-policies = []
-w = []
-for i in range(num_tasks):
-  if __name__ == '__main__':
-    eps=0.15
+if __name__ == '__main__':
+
+  num_tasks =11
+
+  policies = []
+  w = []
+  for i in range(num_tasks):
+    eps=0.0
     policy_model_out, weights, results, violations = main(i+1, policies, w,eps, episodes=10)
     print(i)
     w.append(weights)
-    policies.append(policy_model_out)
+    #policies.append(policy_model_out)
 
     # Run the policy on the test task for 10 runs to get the variance plots
     if (i+1) == num_tasks:
       policies = policies[:-1]
       w = w[:-1]
       for j in range(10):
-        policy_model_test, weights, results_test, violations_test = main(i+1, policies, w,eps,episodes=100)
+        policy_model_test, weights, results_test, violations_test = main(i+1, policies, w,eps,episodes=10)
         np.save('maps/Test_task_data/WFAL+adaptive/rewards_test'+str(j+1)+'.npy', results_test)
         np.save('maps/Test_task_data/WFAL+adaptive/costs_test'+str(j+1)+'_'+str(eps)+'.npy', violations_test)
     # eps=0.05
-plt.figure(1)
-for i in range(10):
-# f=open('maps/Test_task_data/WFAL+adaptive/rewards_test'+str(i+1)+'.npy','r')
-# with open('maps/Test_task_data/WFAL+adaptive/rewards_test'+str(i+1)+'.npy', 'rb') as f:
-    results_test=np.load('maps/Test_task_data/WFAL+adaptive/rewards_test'+str(i+1)+'.npy')
-# R=R+results_test
-# with open('maps/Test_task_data/WFAL+adaptive/costs_test'+str(i+1)+'.npy', 'rb') as g:
-#     costs_test=np.load('maps/Test_task_data/WFAL+adaptive/costs_test'+str(i+1)+'.npy')
+  plt.figure(1)
+  for i in range(10):
+  # f=open('maps/Test_task_data/WFAL+adaptive/rewards_test'+str(i+1)+'.npy','r')
+  # with open('maps/Test_task_data/WFAL+adaptive/rewards_test'+str(i+1)+'.npy', 'rb') as f:
+      results_test=np.load('maps/Test_task_data/WFAL+adaptive/rewards_test'+str(i+1)+'.npy')
+  # R=R+results_test
+  # with open('maps/Test_task_data/WFAL+adaptive/costs_test'+str(i+1)+'.npy', 'rb') as g:
+  #     costs_test=np.load('maps/Test_task_data/WFAL+adaptive/costs_test'+str(i+1)+'.npy')
+      
+
+      plt.plot(results_test)
+  # plt.plot(costs_test)
+  # r=np.vstack(R)
+
+  plt.savefig('rewards_plot.png')
+
+
+  plt.figure(2)    
     
+  for i in range(10):
+  # with open('maps/Test_task_data/WFAL+adaptive/rewards_test'+str(i+1)+'.npy', 'rb') as f:
+  #     results_test=np.load('maps/Test_task_data/WFAL+adaptive/rewards_test'+str(i+1)+'.npy')
+  # with open('maps/Test_task_data/WFAL+adaptive/costs_test'+str(i+1)+'.npy', 'rb') as g:
+      costs_test=np.load('maps/Test_task_data/WFAL+adaptive/costs_test'+str(i+1)+'_'+str(eps)+'.npy')
+  # C=C+costs_test    
+      
 
-    plt.plot(results_test)
-# plt.plot(costs_test)
-# r=np.vstack(R)
-
-plt.savefig('rewards_plot.png')
+      plt.plot(costs_test)
+  plt.savefig('cost_plot'+str(eps)+'.png')
 
 
-plt.figure(2)    
-   
-for i in range(10):
-# with open('maps/Test_task_data/WFAL+adaptive/rewards_test'+str(i+1)+'.npy', 'rb') as f:
-#     results_test=np.load('maps/Test_task_data/WFAL+adaptive/rewards_test'+str(i+1)+'.npy')
-# with open('maps/Test_task_data/WFAL+adaptive/costs_test'+str(i+1)+'.npy', 'rb') as g:
-    costs_test=np.load('maps/Test_task_data/WFAL+adaptive/costs_test'+str(i+1)+'_'+str(eps)+'.npy')
-# C=C+costs_test    
-    
-
-    plt.plot(costs_test)
-plt.savefig('cost_plot'+str(eps)+'.png')

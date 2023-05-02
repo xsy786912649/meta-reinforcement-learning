@@ -15,7 +15,7 @@ eps=0.15
 for i in range(10):
     # f=open('maps/Test_task_data/WFAL+adaptive/rewards_test'+str(i+1)+'.npy','r')
     # with open('maps/Test_task_data/WFAL+adaptive/rewards_test'+str(i+1)+'.npy', 'rb') as f:
-    results_test=np.load('maps/Test_task_data/WFAL+adaptive/rewards_test'+str(i+1)+'.npy')
+    results_test=np.load('maps/Test_task_data/SAC/rewards_test'+str(i+1)+'.npy')
     # R=R+results_test
     # with open('maps/Test_task_data/WFAL+adaptive/costs_test'+str(i+1)+'.npy', 'rb') as g:
     #     costs_test=np.load('maps/Test_task_data/WFAL+adaptive/costs_test'+str(i+1)+'.npy')
@@ -34,7 +34,7 @@ for i in range(10):
     # with open('maps/Test_task_data/WFAL+adaptive/rewards_test'+str(i+1)+'.npy', 'rb') as f:
     #     results_test=np.load('maps/Test_task_data/WFAL+adaptive/rewards_test'+str(i+1)+'.npy')
     # with open('maps/Test_task_data/WFAL+adaptive/costs_test'+str(i+1)+'.npy', 'rb') as g:
-    costs_test=np.load('maps/Test_task_data/WFAL+adaptive/costs_test'+str(i+1)+'_'+str(eps)+'.npy')
+    costs_test=np.load('maps/Test_task_data/SAC/costs_test'+str(i+1)+'_'+str(eps)+'.npy')
     # C=C+costs_test    
     
 
