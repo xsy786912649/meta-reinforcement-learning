@@ -162,7 +162,7 @@ if __name__ == '__main__':
 
   num_tasks =11
   Meta_map=Model()
-
+  
   for i in range(num_tasks): 
     task_index=i+1
     print(task_index)
@@ -171,6 +171,5 @@ if __name__ == '__main__':
     policy_model_out, results, violations = run(task_index,meta_parameter, episodes=10)
 
     torch.save(Meta_map, "meta_parameter_map.pth")
-
-
-
+    
+    
