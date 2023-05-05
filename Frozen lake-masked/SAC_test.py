@@ -6,10 +6,74 @@ Created on Sun Apr  2 23:08:13 2023
 """
 from CRPO_frozenlake import *
 
+import scipy.io as scio
+import torchvision
+import torch
+from torch import nn 
+from torch.utils.data import Dataset,DataLoader,TensorDataset
+from torchvision import datasets, transforms
+import time
+import numpy as np 
+import pandas as pd
+import random
+import math
+from torch.nn import functional as F
+
 nA=4
 nS=4*4
 eps=0.05
 Backward=backward_state(eps,nA,nS,False)
+
+map_name_list=[]
+for i in range(199):
+  map_name = np.load('maps/map'+str(i+1)+'.npy')
+  map_name = map_name.tolist()
+  map_name_list.append(map_name)
+
+class Model(torch.nn.Module):
+  def __init__(self):
+    super(Model, self).__init__()
+    self.params = [
+                torch.Tensor(128, 16).uniform_(-1./math.sqrt(16), 1./math.sqrt(8)).requires_grad_(),
+                torch.Tensor(128).zero_().requires_grad_(),
+
+                torch.Tensor(128, 128).uniform_(-1./math.sqrt(128), 1./math.sqrt(128)).requires_grad_(),
+                torch.Tensor(128).zero_().requires_grad_(),
+
+                torch.Tensor(64, 128).uniform_(-1./math.sqrt(128), 1./math.sqrt(128)).requires_grad_(),
+                torch.Tensor(64).zero_().requires_grad_(),
+
+            ]
+
+  def dense(self, x, params):
+    y = F.linear(x, params[0], params[1])
+    y = F.relu(y)
+
+    y = F.linear(y, params[2], params[3])
+    y = F.relu(y)
+
+    y = F.linear(y, params[4], params[5])
+
+    return y
+  
+  def forward(self, map_index, params):
+    output=self.dense(self.input_process(map_index), params)
+    output=output.reshape(16,4)
+    return output
+  
+  def input_process(self, map_index):
+    map_name=map_name_list[map_index-1]
+    map_input=[list(map_row) for map_row in map_name]
+    map_vector=[]
+    for row in map_input:
+        for k in row:
+            if k=='H':
+                map_vector.append(1.0)
+            else:
+                map_vector.append(0.0)
+    map_vector=np.array(map_vector)
+    map_tensor=torch.FloatTensor(map_vector)
+    return map_tensor
 
 def Test(num_tasks, meta_parameter ,episodes):
 
@@ -60,7 +124,6 @@ def Test(num_tasks, meta_parameter ,episodes):
                                                                                          d_threshold, N_0, alpha,
                                                                                          Unsafe_states, Unsafe_actions,eps_new,H)
 
-      
       policy_model = policy_model_out
       qtable_cost = cost_model
       qtable_reward = value_model
@@ -102,13 +165,17 @@ def Test(num_tasks, meta_parameter ,episodes):
 
 if __name__ == '__main__':
 
-  num_tasks =11
-  meta_parameter = np.load('meta_parameter.npy')
+  num_tasks =99
 
   for i in range(num_tasks): 
-    task_num=i+100
-    print(task_num)
-    policy_model_test, results_test, violations_test = Test(task_num+1,meta_parameter,episodes=10)
+    task_index=i+101
+    print(task_index)
+
+    Meta_map=torch.load("meta_parameter_map.pth")
+    meta_parameter=Meta_map.forward(task_index-1,Meta_map.params)
+    meta_parameter=meta_parameter.data.numpy()
+
+    policy_model_test, results_test, violations_test = Test(task_index,meta_parameter,episodes=10)
     np.save('maps/Test_task_data/SAC/rewards_test'+str(i+1)+'.npy', results_test)
     np.save('maps/Test_task_data/SAC/costs_test'+str(i+1)+'_'+str(eps)+'.npy', violations_test)
 
