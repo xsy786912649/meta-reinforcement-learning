@@ -21,7 +21,7 @@ from torch.nn import functional as F
 
 nA=4
 nS=4*4
-eps=0.05
+eps=0.0
 Backward=backward_state(eps,nA,nS,False)
 
 map_name_list=[]
@@ -44,6 +44,7 @@ class Model(torch.nn.Module):
                 torch.Tensor(64).zero_().requires_grad_(),
 
             ]
+    self.soft=torch.nn.Softmax(dim=1)
 
   def dense(self, x, params):
     y = F.linear(x, params[0], params[1])
@@ -59,6 +60,7 @@ class Model(torch.nn.Module):
   def forward(self, map_index, params):
     output=self.dense(self.input_process(map_index), params)
     output=output.reshape(16,4)
+    output=self.soft(output)
     return output
   
   def input_process(self, map_index):
@@ -175,9 +177,22 @@ if __name__ == '__main__':
     Meta_map=torch.load("pth/meta_parameter_map_epho99.pth")
     meta_parameter=Meta_map.forward(task_index-1,Meta_map.params)
     meta_parameter=meta_parameter.data.numpy()
-    #meta_parameter=np.ones((16,4))
+    #meta_parameter=np.array([[0,1,1,0],[0,1,1,0],[0,1,1,0],[0,1,0,0],[0,1,1,0],[0,1,1,0],[0,1,1,0],[0,1,0,0],[0,1,1,0],[0,1,1,0],[0,1,1,0],[0,1,0,0],[0,0,1,0],[0,0,1,0],[0,0,1,0],[0,1,1,0]])
 
     policy_model_test, results_test, violations_test = Test(task_index,meta_parameter,episodes=5)
     np.save('maps/Test_task_data/SAC/rewards_test'+str(i)+'.npy', results_test)
     np.save('maps/Test_task_data/SAC/costs_test'+str(i)+'.npy', violations_test)
+
+  for i in range(num_tasks): 
+    task_index=i+101
+    print(task_index)
+
+    Meta_map=torch.load("pth/meta_parameter_map_epho0.pth")
+    meta_parameter=Meta_map.forward(task_index-1,Meta_map.params)
+    meta_parameter=meta_parameter.data.numpy()
+    #meta_parameter=np.array([[0,1,1,0],[0,1,1,0],[0,1,1,0],[0,1,0,0],[0,1,1,0],[0,1,1,0],[0,1,1,0],[0,1,0,0],[0,1,1,0],[0,1,1,0],[0,1,1,0],[0,1,0,0],[0,0,1,0],[0,0,1,0],[0,0,1,0],[0,1,1,0]])
+
+    policy_model_test, results_test, violations_test = Test(task_index,meta_parameter,episodes=5)
+    np.save('maps/Test_task_data/SAC/rewards_test_initial'+str(i)+'.npy', results_test)
+    np.save('maps/Test_task_data/SAC/costs_test_initial'+str(i)+'.npy', violations_test)
 

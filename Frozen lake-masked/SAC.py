@@ -21,7 +21,7 @@ from torch.nn import functional as F
 
 nA=4
 nS=4*4
-eps=0.05
+eps=0.0
 gamma = 0.9             # Discount factor
 Backward=backward_state(eps,nA,nS,False)
 
@@ -35,7 +35,7 @@ class Model(torch.nn.Module):
   def __init__(self):
     super(Model, self).__init__()
     self.params = [
-                torch.FloatTensor(128, 16).uniform_(-1./math.sqrt(16), 1./math.sqrt(8)).requires_grad_(),
+                torch.FloatTensor(128, 16).uniform_(-1./math.sqrt(16), 1./math.sqrt(16)).requires_grad_(),
                 torch.FloatTensor(128).zero_().requires_grad_(),
 
                 torch.FloatTensor(128, 128).uniform_(-1./math.sqrt(128), 1./math.sqrt(128)).requires_grad_(),
@@ -45,6 +45,7 @@ class Model(torch.nn.Module):
                 torch.FloatTensor(64).zero_().requires_grad_(),
 
             ]
+    self.soft=torch.nn.Softmax(dim=1)
 
   def dense(self, x, params):
     y = F.linear(x, params[0], params[1])
@@ -60,6 +61,7 @@ class Model(torch.nn.Module):
   def forward(self, map_index, params):
     output=self.dense(self.input_process(map_index), params)
     output=output.reshape(16,4)
+    output=self.soft(output)
     return output
   
   def input_process(self, map_index):
@@ -241,16 +243,16 @@ if __name__ == '__main__':
   target_Q_meta.params=[pa.clone().detach().requires_grad_() for pa in Q_meta.params]
 
   replay_buffer=[]
-  replay_buffer_size=20000
+  replay_buffer_size=10000
 
-  batch_size_task=10
-  batch_size_point=10
+  batch_size_task=50
+  batch_size_point=50
   epoch_when_each_new=5
 
   optimizer_Q=torch.optim.Adam(Q_meta.params,lr=0.001,weight_decay=0.0)
   optimizer_action=torch.optim.Adam(Meta_map.params,lr=0.00003,weight_decay=0.0)
 
-  nosiy_scale=0.005
+  nosiy_scale=0.03
   noisy=np.random.normal(loc=0.0, scale=nosiy_scale, size=(16,4)) 
   
   for revealed_task_num in range(100):
@@ -272,7 +274,7 @@ if __name__ == '__main__':
         meta_parameter=meta_parameter_tensor.data.numpy()
         meta_parameter_add_noisy=meta_parameter+noisy 
         policy_model_out, results, violations = run(task_index+1,meta_parameter_add_noisy) 
-        #print(meta_parameter)
+        print(meta_parameter)
         data_pair=(task_index,torch.FloatTensor(meta_parameter_add_noisy),results[-1]-0.5,task_index+1)
         replay_buffer=add_pair(replay_buffer,data_pair,replay_buffer_size)
 
@@ -288,7 +290,7 @@ if __name__ == '__main__':
         task_index_sample_next=sample[3]
         next_action=target_meta.forward(task_index_sample_next,target_meta.params)
 
-        q_value=results_sample+0.9*target_Q_meta.forward(task_index_sample_next,next_action,target_Q_meta.params) 
+        q_value=results_sample+0.8*target_Q_meta.forward(task_index_sample_next,next_action,target_Q_meta.params) 
         loss_Q=torch.pow((Q_meta.forward(task_index_sample,meta_parameter_tensor_sample,Q_meta.params)-q_value),2)/float(batch_size_point)
         loss_Q.backward()
 
