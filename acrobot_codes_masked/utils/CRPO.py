@@ -13,7 +13,7 @@ from copy import deepcopy
 
 from utils.DQNSoftmax import *
 from utils.DQNRegressor import *
-
+from math import exp
 
 class CRPO:
     def __init__(
@@ -173,7 +173,7 @@ class CRPO:
         if sin1*sin2-cos1*cos2-cos1 > self.height:
             return 1.0#+self.noise
         else:
-            return sin1*sin2-cos1*cos2-cos1
+            return exp(sin1*sin2-cos1*cos2-cos1)
 
     def constraint_I(self, theta1_dot, action):
         if self.direction == 1:
@@ -262,7 +262,13 @@ class CRPO:
         actions = self.flatten([path["actions"] for path in paths])
         action_dists = self.flatten([path["action_distributions"] for path in paths])
         entropy = entropy / len(actions)
-        discounted_total_reward=sum(discounted_rewards)/self.episodes
+        discounted_total_reward= 0
+        for path in [path["rewards"] for path in paths]:
+          discounted_total_reward_tem=0
+          for j,reward in enumerate(path):
+              discounted_total_reward_tem+=reward*(self.gamma**j)
+          discounted_total_reward+= discounted_total_reward_tem
+        discounted_total_reward=discounted_total_reward/self.episodes
         return observations, np.asarray(discounted_rewards), discounted_total_reward, np.asarray(discounted_costs), total_cost, \
             np.asarray(discounted_costs2), total_cost2, actions, action_dists, entropy, average_violations
 
