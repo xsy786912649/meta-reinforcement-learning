@@ -42,7 +42,7 @@ class CRPO:
             limit_2 = 50,
             tolerance = -0.5
         ):
-        length = length + np.random.normal(0,30)
+        # length = length + np.random.normal(0,30)
         self.eps=eps/length
         self.H=length
         self.height = height
@@ -169,11 +169,11 @@ class CRPO:
         return [item for sublist in l for item in sublist]
 
     def reward_function(self, cos1, sin1, cos2, sin2):
-        return sin1*sin2-cos1*cos2-cos1
+        # return sin1*sin2-cos1*cos2-cos1
         if sin1*sin2-cos1*cos2-cos1 > self.height:
-            return 1.0+self.noise
+            return 1.0#+self.noise
         else:
-            return 0.0
+            return sin1*sin2-cos1*cos2-cos1
 
     def constraint_I(self, theta1_dot, action):
         if self.direction == 1:

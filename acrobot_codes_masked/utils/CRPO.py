@@ -29,9 +29,9 @@ class CRPO:
             height = -0.5,
             direction = 0,
             value_function_lr = 1.0,
-            gamma = 0.98,
+            gamma = 0.9,
             episodes = 10,
-            length = 300,
+            length = 200,
             max_kl = 0.02,
             cg_damping = 0.006,
             cg_iters = 10,
@@ -42,7 +42,7 @@ class CRPO:
             limit_2 = 50,
             tolerance = -0.5
         ):
-        length = length + np.random.normal(0,30)
+        # length = length + np.random.normal(0,30)
         self.eps=eps/length
         self.H=length
         self.height = height
@@ -169,11 +169,11 @@ class CRPO:
         return [item for sublist in l for item in sublist]
 
     def reward_function(self, cos1, sin1, cos2, sin2):
-        return sin1*sin2-cos1*cos2-cos1
+        # return sin1*sin2-cos1*cos2-cos1
         if sin1*sin2-cos1*cos2-cos1 > self.height:
-            return 1.0+self.noise
+            return 1.0#+self.noise
         else:
-            return 0.0
+            return sin1*sin2-cos1*cos2-cos1
 
     def constraint_I(self, theta1_dot, action):
         if self.direction == 1:
@@ -211,7 +211,7 @@ class CRPO:
             observation = self.env.reset()
             length_so_far = 0
             done = False
-            while length_so_far < self.length:
+            while length_so_far < self.length and not done:
                 if done: observation = self.env.reset()
                 observations.append(observation)
                 action, action_dist,m,prob = self.sample_action_from_policy(observation)
@@ -262,8 +262,8 @@ class CRPO:
         actions = self.flatten([path["actions"] for path in paths])
         action_dists = self.flatten([path["action_distributions"] for path in paths])
         entropy = entropy / len(actions)
-
-        return observations, np.asarray(discounted_rewards), total_reward, np.asarray(discounted_costs), total_cost, \
+        discounted_total_reward=sum(discounted_rewards)/self.episodes
+        return observations, np.asarray(discounted_rewards), discounted_total_reward, np.asarray(discounted_costs), total_cost, \
             np.asarray(discounted_costs2), total_cost2, actions, action_dists, entropy, average_violations
 
     def mean_kl_divergence(self, model, policy_model, observations):
@@ -332,7 +332,7 @@ class CRPO:
     def step(self):
         # Generate rollout
         # print('before sample: ',self.cost_value_function_1,self.cost_value_function_2)
-        self.all_observations, all_discounted_rewards, total_reward, all_discounted_costs, total_cost,\
+        self.all_observations, all_discounted_rewards, discounted_total_reward, all_discounted_costs, total_cost,\
         all_discounted_costs2, total_cost2, all_actions, all_action_dists, \
         entropy , average_violations= self.sample_trajectories()
         # print(average_violations)
@@ -451,7 +451,7 @@ class CRPO:
                     vector_to_parameters(theta, self.policy.parameters())
 
                 kl_old_new = self.mean_kl_divergence(old_model, self.policy, observations)
-                diagnostics = collections.OrderedDict([('Total Reward', total_reward), ('Total Cost', -1*total_cost), ('Total Cost2', -1*total_cost2),
+                diagnostics = collections.OrderedDict([('Total Reward', discounted_total_reward), ('Total Cost', -1*total_cost), ('Total Cost2', -1*total_cost2),
                                                        ('Average Violations', average_violations)
                                                         # ('KL Old New', kl_old_new.data.item()), ('Entropy', entropy.data.item()), ('EV Before', ev_before),
                                                         # ('EV After', ev_after)
@@ -462,4 +462,4 @@ class CRPO:
             else:
                 print("Policy gradient is 0. Skipping update...")
 
-        return total_reward, -total_cost, -total_cost2, average_violations
+        return discounted_total_reward, -total_cost, -total_cost2, average_violations

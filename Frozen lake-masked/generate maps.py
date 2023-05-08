@@ -40,10 +40,10 @@ def generate_random_markov_map(m_=None,size=4, p=0.7):
             for i in range(size):
                 for j in range(size):
                     if m_[i][j]== "F":
-                        res[i][j]=np.random.choice(["F", "H"],  p=[p, 1 - p])
+                        res[i][j]=np.random.choice(["F", "H"],  p=[p, 1-p])
                     elif m_[i][j]== "H":
                         res[i][j]=np.random.choice(["F", "H"], p=[1-p,  p])
-            # res = np.random.choice(["F", "H"], (size, size), p=[p, 1 - p])
+            
             res[0][0] = "S"
             res[-1][-1] = "G"
             valid = is_valid(res) 
@@ -77,19 +77,10 @@ def is_valid(res):
   return False
 
 
-#m=None
-#for i in range(100):
-#    m=generate_random_markov_map(m,size=4, p=0.3+0.035*i)
-#    with open('maps/map'+str(i)+'.npy', 'wb') as f:
-#        np.save(f,m)
-
 m=None
-for i in range(200):
-    #m=generate_random_map(size=4, p=0.8)
-    m=generate_random_markov_map(m,size=4, p=0.3+0.035*i)
+np.random.seed(1)
+for i in range(201):
+    # m=generate_random_map(p=0.3)
+    m=generate_random_markov_map(m,size=4, p=0.2)
     with open('maps/map'+str(i)+'.npy', 'wb') as f:
         np.save(f,m)
-
-
-
-

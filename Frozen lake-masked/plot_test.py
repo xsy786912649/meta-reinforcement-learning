@@ -11,11 +11,11 @@ import pickle
 plt.figure(1)
 # num_task=
 R=()
-eps=0.15
-for i in range(10):
+for i in range(100):
+    task_index=i+100
     # f=open('maps/Test_task_data/WFAL+adaptive/rewards_test'+str(i+1)+'.npy','r')
     # with open('maps/Test_task_data/WFAL+adaptive/rewards_test'+str(i+1)+'.npy', 'rb') as f:
-    results_test=np.load('maps/Test_task_data/SAC/rewards_test'+str(i+1)+'.npy')
+    results_test=np.load('maps/Test_task_data/SAC/rewards_test'+str(i)+'.npy')
     # R=R+results_test
     # with open('maps/Test_task_data/WFAL+adaptive/costs_test'+str(i+1)+'.npy', 'rb') as g:
     #     costs_test=np.load('maps/Test_task_data/WFAL+adaptive/costs_test'+str(i+1)+'.npy')
@@ -30,13 +30,14 @@ plt.savefig('rewards_plot.png')
 
 plt.figure(2)    
 C=()
-for i in range(10):
+for i in range(100):
+    task_index=i+100
     # with open('maps/Test_task_data/WFAL+adaptive/rewards_test'+str(i+1)+'.npy', 'rb') as f:
     #     results_test=np.load('maps/Test_task_data/WFAL+adaptive/rewards_test'+str(i+1)+'.npy')
     # with open('maps/Test_task_data/WFAL+adaptive/costs_test'+str(i+1)+'.npy', 'rb') as g:
-    costs_test=np.load('maps/Test_task_data/SAC/costs_test'+str(i+1)+'_'+str(eps)+'.npy')
+    costs_test=np.load('maps/Test_task_data/SAC/costs_test'+str(i)+'.npy')
     # C=C+costs_test    
     
 
     plt.plot(costs_test)
-plt.savefig('cost_plot'+str(eps)+'.png')
+plt.savefig('cost_plot'+'.png')

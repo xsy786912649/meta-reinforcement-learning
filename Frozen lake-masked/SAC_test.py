@@ -25,8 +25,8 @@ eps=0.05
 Backward=backward_state(eps,nA,nS,False)
 
 map_name_list=[]
-for i in range(199):
-  map_name = np.load('maps/map'+str(i+1)+'.npy')
+for i in range(200):
+  map_name = np.load('maps/map'+str(i)+'.npy')
   map_name = map_name.tolist()
   map_name_list.append(map_name)
 
@@ -62,7 +62,7 @@ class Model(torch.nn.Module):
     return output
   
   def input_process(self, map_index):
-    map_name=map_name_list[map_index-1]
+    map_name=map_name_list[map_index]
     map_input=[list(map_row) for map_row in map_name]
     map_vector=[]
     for row in map_input:
@@ -75,7 +75,7 @@ class Model(torch.nn.Module):
     map_tensor=torch.FloatTensor(map_vector)
     return map_tensor
 
-def Test(num_tasks, meta_parameter ,episodes):
+def Test(num_tasks, meta_parameter ,episodes=5):
 
     global eps
     
@@ -87,11 +87,10 @@ def Test(num_tasks, meta_parameter ,episodes):
 
     ## Hyperparameter
     beta = 0.3    # value function learning rate for the critic
-    gamma = 0.9             # Discount factor
-    episodes = 10 #10        
+    gamma = 0.9             # Discount factor  
     length = 100  #50       # Length of the sample trajectories, maybe we can change this
 
-    STEP = 5
+    STEP = 10
     H = 100
     print('epsilon = ', eps, 'H = ', H)
     eps_new = eps/length
@@ -139,7 +138,8 @@ def Test(num_tasks, meta_parameter ,episodes):
       results_avg.append(result_avg)
       violations_avg.append(violation_avg)
 
-
+    ###############--------------plot--------------------############################################
+    '''
     constraint1 = [d_threshold for i in range(STEP)]
     # constraint2 = [d_threshold for i in range(STEP)]
 
@@ -158,25 +158,26 @@ def Test(num_tasks, meta_parameter ,episodes):
     plt.ylabel('Reward/Cost')
     plt.title('Task'+str(num_tasks))
     plt.show()
-
+    '''
+    print(results)
 
     return policy_model_out, results, violations
 
 
 if __name__ == '__main__':
 
-  num_tasks =99
+  num_tasks =100
 
   for i in range(num_tasks): 
-    task_index=i+101
+    task_index=i+100
     print(task_index)
 
-    Meta_map=torch.load("meta_parameter_map.pth")
+    Meta_map=torch.load("pth/meta_parameter_map_epho99.pth")
     meta_parameter=Meta_map.forward(task_index-1,Meta_map.params)
     meta_parameter=meta_parameter.data.numpy()
+    #meta_parameter=np.ones((16,4))
 
-    policy_model_test, results_test, violations_test = Test(task_index,meta_parameter,episodes=10)
-    np.save('maps/Test_task_data/SAC/rewards_test'+str(i+1)+'.npy', results_test)
-    np.save('maps/Test_task_data/SAC/costs_test'+str(i+1)+'_'+str(eps)+'.npy', violations_test)
-
+    policy_model_test, results_test, violations_test = Test(task_index,meta_parameter,episodes=5)
+    np.save('maps/Test_task_data/SAC/rewards_test'+str(i)+'.npy', results_test)
+    np.save('maps/Test_task_data/SAC/costs_test'+str(i)+'.npy', violations_test)
 
