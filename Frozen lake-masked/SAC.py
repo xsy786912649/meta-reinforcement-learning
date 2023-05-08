@@ -243,8 +243,8 @@ if __name__ == '__main__':
   replay_buffer=[]
   replay_buffer_size=200
 
-  batch_size_task=5
-  batch_size_point=5
+  batch_size_task=10
+  batch_size_point=10
   epoch_when_each_new=1
 
   optimizer_Q=torch.optim.Adam(Q_meta.params,lr=0.001,weight_decay=0.0)
@@ -272,8 +272,8 @@ if __name__ == '__main__':
         meta_parameter=meta_parameter_tensor.data.numpy()
         meta_parameter_add_noisy=meta_parameter+noisy 
         policy_model_out, results, violations = run(task_index+1,meta_parameter_add_noisy) 
-        #print(meta_parameter_add_noisy)
-        data_pair=(task_index,torch.FloatTensor(meta_parameter_add_noisy),results[-1],task_index+1)
+        #print(meta_parameter)
+        data_pair=(task_index,torch.FloatTensor(meta_parameter_add_noisy),results[-1]-0.8,task_index+1)
         replay_buffer=add_pair(replay_buffer,data_pair,replay_buffer_size)
 
       list_sample=sample_pair(replay_buffer,batch_size_point)
