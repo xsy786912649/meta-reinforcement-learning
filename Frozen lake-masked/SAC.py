@@ -245,7 +245,7 @@ if __name__ == '__main__':
 
   batch_size_task=10
   batch_size_point=10
-  epoch_when_each_new=1
+  epoch_when_each_new=3
 
   optimizer_Q=torch.optim.Adam(Q_meta.params,lr=0.001,weight_decay=0.0)
   optimizer_action=torch.optim.Adam(Meta_map.params,lr=0.0001,weight_decay=0.0)
