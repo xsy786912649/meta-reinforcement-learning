@@ -169,7 +169,7 @@ if __name__ == '__main__':
   num_tasks =100
 
   for i in range(num_tasks): 
-    task_index=i+100
+    task_index=i+101
     print(task_index)
 
     Meta_map=torch.load("pth/meta_parameter_map_epho99.pth")

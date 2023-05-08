@@ -20,12 +20,12 @@ for i in range(100):
     # with open('maps/Test_task_data/WFAL+adaptive/costs_test'+str(i+1)+'.npy', 'rb') as g:
     #     costs_test=np.load('maps/Test_task_data/WFAL+adaptive/costs_test'+str(i+1)+'.npy')
         
-
     plt.plot(results_test)
     # plt.plot(costs_test)
 # r=np.vstack(R)
 
 plt.savefig('rewards_plot.png')
+plt.show()
 
 
 plt.figure(2)    

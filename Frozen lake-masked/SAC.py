@@ -142,7 +142,7 @@ def run(num_tasks, meta_parameter, episodes=5):
     #episodes = 5 #10        
     length = 100  #50       # Length of the sample trajectories, maybe we can change this
   
-    STEP = 5
+    STEP = 3
     H = 100
     #print('epsilon = ', eps, 'H = ', H)
     eps_new = eps/length
@@ -241,14 +241,14 @@ if __name__ == '__main__':
   target_Q_meta.params=[pa.clone().detach().requires_grad_() for pa in Q_meta.params]
 
   replay_buffer=[]
-  replay_buffer_size=200
+  replay_buffer_size=20000
 
   batch_size_task=10
   batch_size_point=10
-  epoch_when_each_new=3
+  epoch_when_each_new=5
 
   optimizer_Q=torch.optim.Adam(Q_meta.params,lr=0.001,weight_decay=0.0)
-  optimizer_action=torch.optim.Adam(Meta_map.params,lr=0.0001,weight_decay=0.0)
+  optimizer_action=torch.optim.Adam(Meta_map.params,lr=0.00003,weight_decay=0.0)
 
   nosiy_scale=0.005
   noisy=np.random.normal(loc=0.0, scale=nosiy_scale, size=(16,4)) 
@@ -273,7 +273,7 @@ if __name__ == '__main__':
         meta_parameter_add_noisy=meta_parameter+noisy 
         policy_model_out, results, violations = run(task_index+1,meta_parameter_add_noisy) 
         #print(meta_parameter)
-        data_pair=(task_index,torch.FloatTensor(meta_parameter_add_noisy),results[-1]-0.8,task_index+1)
+        data_pair=(task_index,torch.FloatTensor(meta_parameter_add_noisy),results[-1]-0.5,task_index+1)
         replay_buffer=add_pair(replay_buffer,data_pair,replay_buffer_size)
 
       list_sample=sample_pair(replay_buffer,batch_size_point)
@@ -310,4 +310,4 @@ if __name__ == '__main__':
       target_meta.params=target_meta_para
 
     
-  
+
