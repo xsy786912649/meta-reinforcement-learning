@@ -52,9 +52,8 @@ results_test_mean=np.mean(np.array(results_test_list),axis=0)
 results_test_ini_mean=np.mean(np.array(results_test_list_ini),axis=0)
 plt.plot(results_test_mean,"b") 
 plt.plot(results_test_ini_mean,"r")
-plt.show()
-
 plt.savefig('rewards_plot_ave.png')
+
 plt.figure(4)    
 for i in range(100):
     costs_test=np.load('maps/Test_task_data/SAC/costs_test'+str(i)+'.npy')

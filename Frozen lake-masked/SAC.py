@@ -83,13 +83,13 @@ class Qfunction(torch.nn.Module):
   def __init__(self):
     super(Qfunction, self).__init__()
     self.params = [
-                torch.FloatTensor(128, 16+64).uniform_(-1./math.sqrt(16), 1./math.sqrt(16)).requires_grad_(),
-                torch.FloatTensor(128).zero_().requires_grad_(),
+                torch.FloatTensor(256, 16+64).uniform_(-1./math.sqrt(64), 1./math.sqrt(64)).requires_grad_(),
+                torch.FloatTensor(256).zero_().requires_grad_(),
 
-                torch.FloatTensor(128, 128).uniform_(-1./math.sqrt(128), 1./math.sqrt(128)).requires_grad_(),
-                torch.FloatTensor(128).zero_().requires_grad_(),
+                torch.FloatTensor(256, 256).uniform_(-1./math.sqrt(256), 1./math.sqrt(256)).requires_grad_(),
+                torch.FloatTensor(256).zero_().requires_grad_(),
 
-                torch.FloatTensor(128, 128).uniform_(-1./math.sqrt(128), 1./math.sqrt(128)).requires_grad_(),
+                torch.FloatTensor(128, 256).uniform_(-1./math.sqrt(256), 1./math.sqrt(256)).requires_grad_(),
                 torch.FloatTensor(128).zero_().requires_grad_(),
 
                 torch.FloatTensor(1, 128).uniform_(-1./math.sqrt(128), 1./math.sqrt(128)).requires_grad_(),

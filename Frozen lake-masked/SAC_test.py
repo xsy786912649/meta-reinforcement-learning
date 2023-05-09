@@ -34,7 +34,7 @@ class Model(torch.nn.Module):
   def __init__(self):
     super(Model, self).__init__()
     self.params = [
-                torch.Tensor(128, 16).uniform_(-1./math.sqrt(16), 1./math.sqrt(8)).requires_grad_(),
+                torch.Tensor(128, 16).uniform_(-1./math.sqrt(16), 1./math.sqrt(16)).requires_grad_(),
                 torch.Tensor(128).zero_().requires_grad_(),
 
                 torch.Tensor(128, 128).uniform_(-1./math.sqrt(128), 1./math.sqrt(128)).requires_grad_(),
@@ -170,7 +170,7 @@ if __name__ == '__main__':
 
   num_tasks =100
 
-  Meta_map=torch.load("pth/meta_parameter_map_epho90.pth")
+  Meta_map=torch.load("pth/meta_parameter_map_epho99.pth")
   for i in range(num_tasks): 
     task_index=i+101
     print(task_index)
