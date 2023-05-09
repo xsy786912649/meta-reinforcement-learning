@@ -243,16 +243,16 @@ if __name__ == '__main__':
   target_Q_meta.params=[pa.clone().detach().requires_grad_() for pa in Q_meta.params]
 
   replay_buffer=[]
-  replay_buffer_size=10000
+  replay_buffer_size=40000
 
-  batch_size_task=50
-  batch_size_point=50
-  epoch_when_each_new=5
+  batch_size_task=20
+  batch_size_point=20
+  epoch_when_each_new=10
 
   optimizer_Q=torch.optim.Adam(Q_meta.params,lr=0.001,weight_decay=0.0)
-  optimizer_action=torch.optim.Adam(Meta_map.params,lr=0.00003,weight_decay=0.0)
+  optimizer_action=torch.optim.Adam(Meta_map.params,lr=0.00008,weight_decay=0.0)
 
-  nosiy_scale=0.03
+  nosiy_scale=0.06
   noisy=np.random.normal(loc=0.0, scale=nosiy_scale, size=(16,4)) 
   
   for revealed_task_num in range(100):
@@ -273,7 +273,7 @@ if __name__ == '__main__':
         meta_parameter_tensor=Meta_map.forward(task_index,Meta_map.params)
         meta_parameter=meta_parameter_tensor.data.numpy()
         meta_parameter_add_noisy=meta_parameter+noisy 
-        policy_model_out, results, violations = run(task_index+1,meta_parameter_add_noisy,episodes=10) 
+        policy_model_out, results, violations = run(task_index+1,meta_parameter_add_noisy,episodes=5) 
         print(meta_parameter)
         data_pair=(task_index,torch.FloatTensor(meta_parameter_add_noisy),results[-1]+results[-2]+results[-3]-1.0,task_index+1)
         replay_buffer=add_pair(replay_buffer,data_pair,replay_buffer_size)

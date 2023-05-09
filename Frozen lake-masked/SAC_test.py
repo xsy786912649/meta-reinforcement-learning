@@ -170,7 +170,7 @@ if __name__ == '__main__':
 
   num_tasks =100
 
-  Meta_map=torch.load("pth/meta_parameter_map_epho99.pth")
+  Meta_map=torch.load("pth/meta_parameter_map_epho90.pth")
   for i in range(num_tasks): 
     task_index=i+101
     print(task_index)
