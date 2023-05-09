@@ -19,6 +19,15 @@ import random
 import math
 from torch.nn import functional as F
 
+def setup_seed(seed):
+  torch.manual_seed(seed)
+  #torch.cuda.manual_seed_all(seed)
+  np.random.seed(seed)
+  random.seed(seed)
+  #torch.backends.cudnn.deterministic = True
+
+setup_seed(1)
+
 nA=4
 nS=4*4
 eps=0.0
@@ -46,6 +55,7 @@ class Model(torch.nn.Module):
 
             ]
     self.soft=torch.nn.Softmax(dim=1)
+    #self.soft=torch.nn.LogSoftmax(dim=1)
 
   def dense(self, x, params):
     y = F.linear(x, params[0], params[1])
@@ -83,13 +93,13 @@ class Qfunction(torch.nn.Module):
   def __init__(self):
     super(Qfunction, self).__init__()
     self.params = [
-                torch.FloatTensor(256, 16+64).uniform_(-1./math.sqrt(64), 1./math.sqrt(64)).requires_grad_(),
-                torch.FloatTensor(256).zero_().requires_grad_(),
+                torch.FloatTensor(128, 16+64).uniform_(-1./math.sqrt(64), 1./math.sqrt(64)).requires_grad_(),
+                torch.FloatTensor(128).zero_().requires_grad_(),
 
-                torch.FloatTensor(256, 256).uniform_(-1./math.sqrt(256), 1./math.sqrt(256)).requires_grad_(),
-                torch.FloatTensor(256).zero_().requires_grad_(),
+                torch.FloatTensor(128, 128).uniform_(-1./math.sqrt(128), 1./math.sqrt(128)).requires_grad_(),
+                torch.FloatTensor(128).zero_().requires_grad_(),
 
-                torch.FloatTensor(128, 256).uniform_(-1./math.sqrt(256), 1./math.sqrt(256)).requires_grad_(),
+                torch.FloatTensor(128, 128).uniform_(-1./math.sqrt(128), 1./math.sqrt(128)).requires_grad_(),
                 torch.FloatTensor(128).zero_().requires_grad_(),
 
                 torch.FloatTensor(1, 128).uniform_(-1./math.sqrt(128), 1./math.sqrt(128)).requires_grad_(),

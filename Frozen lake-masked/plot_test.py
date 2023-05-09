@@ -62,3 +62,5 @@ for i in range(100):
 costs_test_mean=np.mean(np.array(costs_test_list),axis=0)
 plt.plot(costs_test_mean) 
 plt.savefig('cost_plot_ave.png')
+
+plt.show()
