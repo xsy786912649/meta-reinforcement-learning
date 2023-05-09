@@ -170,11 +170,11 @@ if __name__ == '__main__':
 
   num_tasks =100
 
+  Meta_map=torch.load("pth/meta_parameter_map_epho99.pth")
   for i in range(num_tasks): 
     task_index=i+101
     print(task_index)
 
-    Meta_map=torch.load("pth/meta_parameter_map_epho99.pth")
     meta_parameter=Meta_map.forward(task_index-1,Meta_map.params)
     meta_parameter=meta_parameter.data.numpy()
     #meta_parameter=np.array([[0,1,1,0],[0,1,1,0],[0,1,1,0],[0,1,0,0],[0,1,1,0],[0,1,1,0],[0,1,1,0],[0,1,0,0],[0,1,1,0],[0,1,1,0],[0,1,1,0],[0,1,0,0],[0,0,1,0],[0,0,1,0],[0,0,1,0],[0,1,1,0]])
@@ -183,11 +183,12 @@ if __name__ == '__main__':
     np.save('maps/Test_task_data/SAC/rewards_test'+str(i)+'.npy', results_test)
     np.save('maps/Test_task_data/SAC/costs_test'+str(i)+'.npy', violations_test)
 
+
+  Meta_map=torch.load("pth/meta_parameter_map_epho0.pth")
   for i in range(num_tasks): 
     task_index=i+101
     print(task_index)
 
-    Meta_map=torch.load("pth/meta_parameter_map_epho0.pth")
     meta_parameter=Meta_map.forward(task_index-1,Meta_map.params)
     meta_parameter=meta_parameter.data.numpy()
     #meta_parameter=np.array([[0,1,1,0],[0,1,1,0],[0,1,1,0],[0,1,0,0],[0,1,1,0],[0,1,1,0],[0,1,1,0],[0,1,0,0],[0,1,1,0],[0,1,1,0],[0,1,1,0],[0,1,0,0],[0,0,1,0],[0,0,1,0],[0,0,1,0],[0,1,1,0]])

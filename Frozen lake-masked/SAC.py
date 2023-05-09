@@ -273,9 +273,9 @@ if __name__ == '__main__':
         meta_parameter_tensor=Meta_map.forward(task_index,Meta_map.params)
         meta_parameter=meta_parameter_tensor.data.numpy()
         meta_parameter_add_noisy=meta_parameter+noisy 
-        policy_model_out, results, violations = run(task_index+1,meta_parameter_add_noisy) 
+        policy_model_out, results, violations = run(task_index+1,meta_parameter_add_noisy,episodes=10) 
         print(meta_parameter)
-        data_pair=(task_index,torch.FloatTensor(meta_parameter_add_noisy),results[-1]-0.5,task_index+1)
+        data_pair=(task_index,torch.FloatTensor(meta_parameter_add_noisy),results[-1]+results[-2]+results[-3]-1.0,task_index+1)
         replay_buffer=add_pair(replay_buffer,data_pair,replay_buffer_size)
 
       list_sample=sample_pair(replay_buffer,batch_size_point)
