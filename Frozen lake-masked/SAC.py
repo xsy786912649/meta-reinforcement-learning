@@ -253,7 +253,7 @@ if __name__ == '__main__':
   target_Q_meta.params=[pa.clone().detach().requires_grad_() for pa in Q_meta.params]
 
   replay_buffer=[]
-  replay_buffer_size=40000
+  replay_buffer_size=10000
 
   batch_size_task=20
   batch_size_point=20
@@ -262,7 +262,7 @@ if __name__ == '__main__':
   optimizer_Q=torch.optim.Adam(Q_meta.params,lr=0.001,weight_decay=0.0)
   optimizer_action=torch.optim.Adam(Meta_map.params,lr=0.00008,weight_decay=0.0)
 
-  nosiy_scale=0.06
+  nosiy_scale=0.03
   noisy=np.random.normal(loc=0.0, scale=nosiy_scale, size=(16,4)) 
   
   for revealed_task_num in range(100):
