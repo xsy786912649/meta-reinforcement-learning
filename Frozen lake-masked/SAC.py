@@ -262,7 +262,6 @@ if __name__ == '__main__':
   batch_size_point=20
   epoch_when_each_new=10
   nosiy_scale=0.06
-  #noisy=np.random.normal(loc=0.0, scale=nosiy_scale, size=(16,4)) 
 
   optimizer_Q=torch.optim.Adam(Q_meta.params,lr=0.001,weight_decay=0.0)
   optimizer_Q2=torch.optim.Adam(Q2_meta.params,lr=0.001,weight_decay=0.0)
