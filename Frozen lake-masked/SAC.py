@@ -26,7 +26,7 @@ def setup_seed(seed):
   random.seed(seed)
   #torch.backends.cudnn.deterministic = True
 
-setup_seed(1)
+setup_seed(100)
 
 nA=4
 nS=4*4
@@ -246,11 +246,14 @@ if __name__ == '__main__':
 
   Meta_map=Model()
   Q_meta=Qfunction()
+  Q2_meta=Qfunction()
 
   target_meta=Model()
   target_meta.params=[pa.clone().detach().requires_grad_() for pa in Meta_map.params]
   target_Q_meta=Qfunction()
   target_Q_meta.params=[pa.clone().detach().requires_grad_() for pa in Q_meta.params]
+  target_Q2_meta=Qfunction()
+  target_Q2_meta.params=[pa.clone().detach().requires_grad_() for pa in Q2_meta.params]
 
   replay_buffer=[]
   replay_buffer_size=10000
@@ -258,13 +261,13 @@ if __name__ == '__main__':
   batch_size_task=20
   batch_size_point=20
   epoch_when_each_new=10
+  nosiy_scale=0.06
+  noisy=np.random.normal(loc=0.0, scale=nosiy_scale, size=(16,4)) 
 
   optimizer_Q=torch.optim.Adam(Q_meta.params,lr=0.001,weight_decay=0.0)
+  optimizer_Q2=torch.optim.Adam(Q2_meta.params,lr=0.001,weight_decay=0.0)
   optimizer_action=torch.optim.Adam(Meta_map.params,lr=0.00008,weight_decay=0.0)
 
-  nosiy_scale=0.03
-  noisy=np.random.normal(loc=0.0, scale=nosiy_scale, size=(16,4)) 
-  
   for revealed_task_num in range(100):
     print("------------------------------------")
     print(revealed_task_num)
@@ -282,15 +285,17 @@ if __name__ == '__main__':
       for task_index in num_tasks_list: 
         meta_parameter_tensor=Meta_map.forward(task_index,Meta_map.params)
         meta_parameter=meta_parameter_tensor.data.numpy()
+        noisy=np.random.normal(loc=0.0, scale=nosiy_scale, size=(16,4)) 
         meta_parameter_add_noisy=meta_parameter+noisy 
         policy_model_out, results, violations = run(task_index+1,meta_parameter_add_noisy,episodes=5) 
-        print(meta_parameter)
+        #print(meta_parameter)
         data_pair=(task_index,torch.FloatTensor(meta_parameter_add_noisy),results[-1]+results[-2]+results[-3]-1.0,task_index+1)
         replay_buffer=add_pair(replay_buffer,data_pair,replay_buffer_size)
 
       list_sample=sample_pair(replay_buffer,batch_size_point)
 
       optimizer_Q.zero_grad()
+      optimizer_Q2.zero_grad()
       optimizer_action.zero_grad()
 
       for sample in list_sample:
@@ -300,9 +305,13 @@ if __name__ == '__main__':
         task_index_sample_next=sample[3]
         next_action=target_meta.forward(task_index_sample_next,target_meta.params)
 
-        q_value=results_sample+0.8*target_Q_meta.forward(task_index_sample_next,next_action,target_Q_meta.params) 
+        valueq1=target_Q_meta.forward(task_index_sample_next,next_action,target_Q_meta.params)
+        valueq2=target_Q2_meta.forward(task_index_sample_next,next_action,target_Q2_meta.params)
+        q_value=results_sample+0.8*torch.minimum(valueq1.clone().detach(),valueq2.clone().detach())
         loss_Q=torch.pow((Q_meta.forward(task_index_sample,meta_parameter_tensor_sample,Q_meta.params)-q_value),2)/float(batch_size_point)
         loss_Q.backward()
+        loss_Q2=torch.pow((Q2_meta.forward(task_index_sample,meta_parameter_tensor_sample,Q2_meta.params)-q_value),2)/float(batch_size_point)
+        loss_Q2.backward()
 
         action_now=meta_parameter_tensor_sample.detach().clone().requires_grad_()
         Q_action=Q_meta.forward(task_index_sample,action_now,Q_meta.params)
@@ -312,14 +321,18 @@ if __name__ == '__main__':
         action_policypara.backward(gradient_Q_action)
 
       optimizer_Q.step()
-      optimizer_action.step()
-
-      target_Q_meta_paras = [target_Q_meta.params[i]*0.99+Q_meta.params[i]*0.01 for i in range(len(target_Q_meta.params))]
-      target_Q_meta_paras = [para.detach().clone().requires_grad_() for para in target_Q_meta_paras]
-      target_Q_meta.params=target_Q_meta_paras
-      target_meta_para = [target_meta.params[i]*0.99+Meta_map.params[i]*0.01 for i in range(len(target_meta.params))]
-      target_meta_para = [para.detach().clone().requires_grad_() for para in target_meta_para] 
-      target_meta.params=target_meta_para
+      optimizer_Q2.step()
+      if epoch%2==0:
+        optimizer_action.step()
+        target_Q_meta_paras = [target_Q_meta.params[i]*0.99+Q_meta.params[i]*0.01 for i in range(len(target_Q_meta.params))]
+        target_Q_meta_paras = [para.detach().clone().requires_grad_() for para in target_Q_meta_paras]
+        target_Q_meta.params=target_Q_meta_paras
+        target_Q2_meta_paras = [target_Q2_meta.params[i]*0.99+Q2_meta.params[i]*0.01 for i in range(len(target_Q2_meta.params))]
+        target_Q2_meta_paras = [para.detach().clone().requires_grad_() for para in target_Q2_meta_paras]
+        target_Q2_meta.params=target_Q2_meta_paras
+        target_meta_para = [target_meta.params[i]*0.99+Meta_map.params[i]*0.01 for i in range(len(target_meta.params))]
+        target_meta_para = [para.detach().clone().requires_grad_() for para in target_meta_para] 
+        target_meta.params=target_meta_para
 
     
 
