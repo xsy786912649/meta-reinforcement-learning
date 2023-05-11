@@ -156,7 +156,7 @@ class MetaSRL:
 
         # print(self.cost_value_function_1,self.cost_value_function_2)
 
-    def evaluate(self,  eps, Height, noise: np.array, crpo_step = 5, crpo_episodes = 50, cg_iters = 10, limit_1 = 50, limit_2 = 50, direction = 0):
+    def evaluate(self,  eps, height, noise: np.array, crpo_step = 5, crpo_episodes = 50, cg_iters = 10, limit_1 = 50, limit_2 = 50, direction = 0):
         env = AcrobotEnv(noise)
         crpo = CRPO(env,  eps, self.input_size, self.output_size, deepcopy(self.policy), deepcopy(self.value_function), deepcopy(self.cost_value_function_1), deepcopy(self.cost_value_function_2),
                     height=height,

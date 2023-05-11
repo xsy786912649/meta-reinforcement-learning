@@ -1,3 +1,6 @@
+import os
+os.add_dll_directory("C://Users//lenovo//.mujoco//mjpro150//bin")
+
 import maml_rl.envs
 import gym
 import torch
