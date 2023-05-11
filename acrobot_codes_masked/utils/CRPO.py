@@ -31,7 +31,7 @@ class CRPO:
             value_function_lr = 1.0,
             gamma = 0.9,
             episodes = 10,
-            length = 200,
+            length = 50,
             max_kl = 0.02,
             cg_damping = 0.006,
             cg_iters = 10,
@@ -169,11 +169,11 @@ class CRPO:
         return [item for sublist in l for item in sublist]
 
     def reward_function(self, cos1, sin1, cos2, sin2):
-        # return sin1*sin2-cos1*cos2-cos1
+        #return sin1*sin2-cos1*cos2-cos1
         if sin1*sin2-cos1*cos2-cos1 > self.height:
             return 1.0#+self.noise
         else:
-            return exp(sin1*sin2-cos1*cos2-cos1)
+            return 0.0
 
     def constraint_I(self, theta1_dot, action):
         if self.direction == 1:
@@ -211,7 +211,7 @@ class CRPO:
             observation = self.env.reset()
             length_so_far = 0
             done = False
-            while length_so_far < self.length and not done:
+            while length_so_far < self.length:
                 if done: observation = self.env.reset()
                 observations.append(observation)
                 action, action_dist,m,prob = self.sample_action_from_policy(observation)
@@ -225,9 +225,9 @@ class CRPO:
 
                 rewards.append(reward)
                 
-                if cost<0 or cost2<0:
-                    violation=1
-                    print('Constraint violation!', action, action_dist,prob,m,observation,cost,cost2,self.direction)
+                #if cost<0 or cost2<0:
+                #    violation=1
+                #    print('Constraint violation!', action, action_dist,prob,m,observation,cost,cost2,self.direction)
                 # elif self.direction==1:
                 #     if observation[4]<0.0 or observation[5]<0.0:
                 #         print(action, action_dist,m,observation)
@@ -236,8 +236,8 @@ class CRPO:
 
                 # next step
                 observation, _, done, _ = self.env.step(action[0, 0].item())  ## change I
-                if violation==1:
-                    done=True
+                #if violation==1:
+                #    done=True
                 length_so_far += 1
             #print("episode: ", episodes_so_far, "length: ", length)
 
@@ -262,14 +262,14 @@ class CRPO:
         actions = self.flatten([path["actions"] for path in paths])
         action_dists = self.flatten([path["action_distributions"] for path in paths])
         entropy = entropy / len(actions)
-        discounted_total_reward= 0
-        for path in [path["rewards"] for path in paths]:
-          discounted_total_reward_tem=0
-          for j,reward in enumerate(path):
-              discounted_total_reward_tem+=reward*(self.gamma**j)
-          discounted_total_reward+= discounted_total_reward_tem
-        discounted_total_reward=discounted_total_reward/self.episodes
-        return observations, np.asarray(discounted_rewards), discounted_total_reward, np.asarray(discounted_costs), total_cost, \
+        #discounted_total_reward= 0
+        #for path in [path["rewards"] for path in paths]:
+        #  discounted_total_reward_tem=0
+        #  for j,reward in enumerate(path):
+        #      discounted_total_reward_tem+=reward*(self.gamma**j)
+        #  discounted_total_reward+= discounted_total_reward_tem
+        #discounted_total_reward=discounted_total_reward/self.episodes
+        return observations, np.asarray(discounted_rewards), total_reward, np.asarray(discounted_costs), total_cost, \
             np.asarray(discounted_costs2), total_cost2, actions, action_dists, entropy, average_violations
 
     def mean_kl_divergence(self, model, policy_model, observations):

@@ -30,7 +30,7 @@ class CRPO:
             value_function_lr = 1.0,
             gamma = 0.98,
             episodes = 10,
-            length = 500,
+            length = 50,
             max_kl = 0.02,
             cg_damping = 0.006,
             cg_iters = 10,

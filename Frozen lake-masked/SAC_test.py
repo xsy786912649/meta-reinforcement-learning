@@ -182,10 +182,10 @@ if __name__ == '__main__':
 
   Meta_map=torch.load("pth/meta_parameter_map_epho99.pth")
   for i in range(num_tasks): 
-    task_index=i+101
+    task_index=i+100
     print(task_index)
 
-    meta_parameter=Meta_map.forward(task_index-1,Meta_map.params)
+    meta_parameter=Meta_map.forward(task_index,Meta_map.params)
     meta_parameter=meta_parameter.data.numpy()
     #meta_parameter=np.array([[0,1,1,0],[0,1,1,0],[0,1,1,0],[0,1,0,0],[0,1,1,0],[0,1,1,0],[0,1,1,0],[0,1,0,0],[0,1,1,0],[0,1,1,0],[0,1,1,0],[0,1,0,0],[0,0,1,0],[0,0,1,0],[0,0,1,0],[0,1,1,0]])
 
@@ -196,7 +196,7 @@ if __name__ == '__main__':
 
   Meta_map=torch.load("pth/meta_parameter_map_epho0.pth")
   for i in range(num_tasks): 
-    task_index=i+101
+    task_index=i+100
     print(task_index)
 
     meta_parameter=Meta_map.forward(task_index-1,Meta_map.params)

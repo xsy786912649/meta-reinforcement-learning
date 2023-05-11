@@ -22,7 +22,7 @@ CG_ITER_COUNT = 5
 INPUT_SIZE = 6
 OUTPUT_SIZE = 3
 VARIANCE = 0.2
-LIMIT_RANGE = [40, 42]
+LIMIT_RANGE = [400, 420]
 
 
 metasrl = MetaSRL(INPUT_SIZE, OUTPUT_SIZE)
@@ -44,8 +44,9 @@ for i in range(TRAIN_TASK_COUNT):
     plt.title("Performance of MetaSRL on Task {}".format(i))
     plt.xlabel("CRPO Runs")
     plt.ylabel("Performance")
-    plt.savefig("results/MetaSRL/run_{}/plots/plot_{}.png".format(RUN,i))
-    plt.close()
+    #plt.savefig("results/MetaSRL/run_{}/plots/plot_{}.png".format(RUN,i))
+    #plt.close()
+    plt.show()
 
     performance = np.array([metasrl.rewards_by_task, metasrl.cost_1s_by_task, metasrl.cost_2s_by_task])
     np.save("results/MetaSRL/run_{}/performance_data/performance_{}.npy".format(RUN,i), performance)

@@ -14,19 +14,17 @@ import argparse
 
 # RUN = args.run
 
-TRAIN_TASK_COUNT = 2# args.train_task_count
+TRAIN_TASK_COUNT = 10# args.train_task_count
 
-CRPO_STEP_COUNT = 2#args.crpo_step_count
-CRPO_EPISODE_COUNT = 50#args.crpo_episode_count
+CRPO_STEP_COUNT = 20#args.crpo_step_count
+CRPO_EPISODE_COUNT = 10#args.crpo_episode_count
 CG_ITER_COUNT = 5
 
 INPUT_SIZE = 6
 OUTPUT_SIZE = 3
 VARIANCE = 0.5
 
-
-eps=0.05
-H=100
+eps=0.5
 LIMIT_RANGE = [40, 42]
 metasrl = MetaSRL(INPUT_SIZE, OUTPUT_SIZE)
 np.random.seed(0)
@@ -45,52 +43,17 @@ for i in range(TRAIN_TASK_COUNT):
     #     height += np.random.normal(0.05,0.001)
     metasrl.step(eps,height, noise=noise, crpo_step=CRPO_STEP_COUNT, crpo_episodes=CRPO_EPISODE_COUNT, cg_iters=CG_ITER_COUNT, limit_1=limit, limit_2=limit, direction=i%2)
     
-    # plt.plot(metasrl.rewards_by_task[-1], label="Reward")
-    # plt.plot(metasrl.cost_1s_by_task[-1], label="Cost 1")
-    # plt.plot(metasrl.cost_2s_by_task[-1], label="Cost 2")
-    # plt.hlines(y=limit, xmin=0, xmax=CRPO_STEP_COUNT, colors="black", linestyles="--", label="Limit 1")
-    # plt.legend(loc="upper right")
-    # plt.title("Performance of MetaSRL on Task {}".format(i))
-    # plt.xlabel("CRPO Runs")
-    # plt.ylabel("Performance")
-    # plt.savefig("results/MetaSRL/run_{}/plots/plot_{}.png".format(RUN,i))
-    # plt.close()
+    plt.plot(metasrl.rewards_by_task[-1], label="Reward")
+    plt.plot(metasrl.cost_1s_by_task[-1], label="Cost 1")
+    plt.plot(metasrl.cost_2s_by_task[-1], label="Cost 2")
+    #plt.hlines(y=limit, xmin=0, xmax=CRPO_STEP_COUNT, colors="black", linestyles="--", label="Limit 1")
+    plt.legend(loc="upper right")
+    plt.title("Performance of MetaSRL on Task {}".format(i))
+    plt.xlabel("CRPO Runs")
+    plt.ylabel("Performance")
+    plt.show()
 
     performance = np.array([metasrl.rewards_by_task, metasrl.cost_1s_by_task, metasrl.cost_2s_by_task,metasrl.average_violations_by_task])
-    np.save("results/MetaSRL/performance_data//run_{}_performance_{}.npy".format(RUN,i), performance)
+    np.save("results/MetaSRL/performance_data/run_{}_performance_{}.npy".format(RUN,i), performance)
 
-    # torch.save(metasrl.policy, "results/MetaSRL/run_{}/models/model_{}.png".format(RUN,i))
-    # torch.save(metasrl.value_function, "results/MetaSRL/run_{}/models/value_function_{}.png".format(RUN,i))
-    # torch.save(metasrl.cost_value_function_1, "results/MetaSRL/run_{}/models/cost_value_function_1_{}.png".format(RUN,i))
-    # torch.save(metasrl.cost_value_function_2, "results/MetaSRL/run_{}/models/cost_value_function_2_{}.png".format(RUN,i))
-    # torch.save(metasrl.average_violations_by_task, "results/MetaSRL/run_{}/models/average_violations_by_task_{}.png".format(RUN,i))
-
-
-    # # Test time
-    # print("########## Test Time ##########")
-    # TEST_TASK_COUNT = 5
     
-    # CRPO_STEP_COUNT = 5
-    # CRPO_EPISODE_COUNT = 5
-    # CG_ITER_COUNT = 5
-    
-    # test_noises = np.random.normal(0.0, VARIANCE, size=(TEST_TASK_COUNT, 4))
-    # test_limits = np.random.randint(low=LIMIT_RANGE[0], high=LIMIT_RANGE[1], size=(TEST_TASK_COUNT))
-    # Height=None
-    # for j in range(TEST_TASK_COUNT):
-    #     print("Task #{}".format(i),"Test Task #{}".format(j))
-    #     test_noise = test_noises[i]
-    #     test_limit = test_limits[i]
-    #     Height=-0.5
-    #     # if Height is None:
-    #     #     Height=-0.5+0.001*j
-    #     # else:
-    #     #     Height += np.random.normal(0.05,0.001)
-    #     metasrl.evaluate( eps, Height,noise=test_noise, crpo_step=CRPO_STEP_COUNT, crpo_episodes=CRPO_EPISODE_COUNT, cg_iters=CG_ITER_COUNT, limit_1=test_limit, limit_2=test_limit, direction=i%2)
-        
-    #     test_performance = np.array([metasrl.test_rewards_by_task, metasrl.test_cost_1s_by_task, metasrl.test_cost_2s_by_task,metasrl.test_average_violations_by_task])
-    #     np.save("results/MetaSRL/performance_data/run_{}_test_performance_{}.npy".format(RUN,i), test_performance)
-        
-    #     # plt.figure(1)
-    #     # plt.plot(metasrl.test_average_violations_by_task)
-    #     # plt.savefig('test_average_violation_acrobot'+str(eps)+'.png')
