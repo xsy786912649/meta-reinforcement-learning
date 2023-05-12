@@ -199,7 +199,7 @@ if __name__ == '__main__':
     task_index=i+100
     print(task_index)
 
-    meta_parameter=Meta_map.forward(task_index-1,Meta_map.params)
+    meta_parameter=Meta_map.forward(task_index,Meta_map.params)
     meta_parameter=meta_parameter.data.numpy()
     #meta_parameter=np.array([[0,1,1,0],[0,1,1,0],[0,1,1,0],[0,1,0,0],[0,1,1,0],[0,1,1,0],[0,1,1,0],[0,1,0,0],[0,1,1,0],[0,1,1,0],[0,1,1,0],[0,1,0,0],[0,0,1,0],[0,0,1,0],[0,0,1,0],[0,1,1,0]])
 

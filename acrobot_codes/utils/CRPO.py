@@ -128,7 +128,7 @@ class CRPO:
         return [item for sublist in l for item in sublist]
 
     def reward_function(self, cos1, sin1, cos2, sin2):
-        # return sin1*sin2-cos1*cos2-cos1
+        return sin1*sin2-cos1*cos2-cos1+2.0
         if sin1*sin2-cos1*cos2-cos1 > self.height:
             return 1.0
         else:
