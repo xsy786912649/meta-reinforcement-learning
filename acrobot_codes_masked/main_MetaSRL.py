@@ -16,7 +16,7 @@ import argparse
 
 TRAIN_TASK_COUNT = 10# args.train_task_count
 
-CRPO_STEP_COUNT = 20#args.crpo_step_count
+CRPO_STEP_COUNT = 10#args.crpo_step_count
 CRPO_EPISODE_COUNT = 10#args.crpo_episode_count
 CG_ITER_COUNT = 5
 
