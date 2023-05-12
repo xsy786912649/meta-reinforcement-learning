@@ -76,17 +76,17 @@ class CRPO:
         else:
             self.value_function = deepcopy(value_function)
 
-        if cost_value_function_1 is None:
-            self.cost_value_function_1 = ValueFunctionWrapper(DQNRegressor(input_size), value_function_lr)
-        else:
+        #if cost_value_function_1 is None:
+        #    self.cost_value_function_1 = ValueFunctionWrapper(DQNRegressor(input_size), value_function_lr)
+        #else:
             # print('cost_1 else')
-            self.cost_value_function_1 = deepcopy(cost_value_function_1)
+        #    self.cost_value_function_1 = deepcopy(cost_value_function_1)
 
-        if cost_value_function_2 is None:
-            self.cost_value_function_2 = ValueFunctionWrapper(DQNRegressor(input_size), value_function_lr)
-        else:
+        #if cost_value_function_2 is None:
+        #    self.cost_value_function_2 = ValueFunctionWrapper(DQNRegressor(input_size), value_function_lr)
+        #else:
             # print('cost_2 else')
-            self.cost_value_function_2 = deepcopy(cost_value_function_2)
+        #    self.cost_value_function_2 = deepcopy(cost_value_function_2)
 
         
         # self.value_function = ValueFunctionWrapper(DQNRegressor(input_size), value_function_lr)
@@ -348,8 +348,8 @@ class CRPO:
             # print("Processing batch number {}".format(batch_num+1))
             observations = self.all_observations[batch_num * self.batch_size:(batch_num+1)*self.batch_size]
             discounted_rewards = all_discounted_rewards[batch_num*self.batch_size:(batch_num+1)*self.batch_size]
-            discounted_costs = all_discounted_costs[batch_num * self.batch_size:(batch_num + 1) * self.batch_size]
-            discounted_costs2 = all_discounted_costs2[batch_num * self.batch_size:(batch_num + 1) * self.batch_size]
+            #discounted_costs = all_discounted_costs[batch_num * self.batch_size:(batch_num + 1) * self.batch_size]
+            #discounted_costs2 = all_discounted_costs2[batch_num * self.batch_size:(batch_num + 1) * self.batch_size]
             actions = all_actions[batch_num * self.batch_size:(batch_num+1)*self.batch_size]
             action_dists = all_action_dists[batch_num * self.batch_size:(batch_num+1)*self.batch_size]
 
@@ -357,27 +357,27 @@ class CRPO:
             # and subtracting the estimated value of each state
             baseline = self.value_function.predict(observations).data
             
-            cost_baseline = self.cost_value_function_1.predict(observations).data
-            cost_baseline2 = self.cost_value_function_2.predict(observations).data
+            #cost_baseline = self.cost_value_function_1.predict(observations).data
+            #cost_baseline2 = self.cost_value_function_2.predict(observations).data
             discounted_rewards_tensor = Tensor(discounted_rewards).unsqueeze(1)
-            discounted_costs_tensor = Tensor(discounted_costs).unsqueeze(1)
-            discounted_costs_tensor2 = Tensor(discounted_costs2).unsqueeze(1)
+            #discounted_costs_tensor = Tensor(discounted_costs).unsqueeze(1)
+            #discounted_costs_tensor2 = Tensor(discounted_costs2).unsqueeze(1)
             advantage = discounted_rewards_tensor - baseline
-            cost_advantage = discounted_costs_tensor - cost_baseline
-            cost_advantage2 = discounted_costs_tensor2 - cost_baseline2
+            #cost_advantage = discounted_costs_tensor - cost_baseline
+            #cost_advantage2 = discounted_costs_tensor2 - cost_baseline2
 
             # Normalize the advantage
             advantage = (advantage - advantage.mean()) / (advantage.std() + 1e-8)
-            cost_advantage = (cost_advantage - cost_advantage.mean()) / (cost_advantage.std() + 1e-8)
-            cost_advantage2 = (cost_advantage2 - cost_advantage2.mean()) / (cost_advantage2.std() + 1e-8)
+            #cost_advantage = (cost_advantage - cost_advantage.mean()) / (cost_advantage.std() + 1e-8)
+            #cost_advantage2 = (cost_advantage2 - cost_advantage2.mean()) / (cost_advantage2.std() + 1e-8)
 
             # Calculate the surrogate loss as the elementwise product of the advantage and the probability ratio of actions taken
             new_p = torch.cat(action_dists).gather(1, torch.cat(actions))
             old_p = new_p.detach() + 1e-8
             prob_ratio = new_p / old_p
             surrogate_loss = -torch.mean(prob_ratio * Variable(advantage)) - (self.ent_coeff * entropy)
-            cost_surrogate_loss = -torch.mean(prob_ratio * Variable(cost_advantage)) - (self.ent_coeff * entropy)
-            cost_surrogate_loss2 = -torch.mean(prob_ratio * Variable(cost_advantage2)) - (self.ent_coeff * entropy)
+            #cost_surrogate_loss = -torch.mean(prob_ratio * Variable(cost_advantage)) - (self.ent_coeff * entropy)
+            #cost_surrogate_loss2 = -torch.mean(prob_ratio * Variable(cost_advantage2)) - (self.ent_coeff * entropy)
 
             # Calculate the gradient of the surrogate loss
             self.policy.zero_grad()
@@ -407,46 +407,46 @@ class CRPO:
                 ## In the paper, CRPO uses the estimated value function (critic's return) to decide whether to update objective function or constraints.
                 ## However, in the experiment the estimation build from the Monte Carlo rollout is good enough.
 
-                if total_cost <= self.limit + self.tolerance:
-                    theta = self.linesearch(parameters_to_vector(self.policy.parameters()), self.policy, observations, actions,
-                                        cost_advantage, fullstep, gdotstepdir / lm)
-                elif total_cost2 <= self.limit2 + self.tolerance:
-                    theta = self.linesearch(parameters_to_vector(self.policy.parameters()), self.policy, observations, actions,
-                                        cost_advantage2, fullstep, gdotstepdir / lm)
-                else:
-                    theta = self.linesearch(parameters_to_vector(self.policy.parameters()), self.policy, observations, actions,
-                                        advantage, fullstep, gdotstepdir / lm)
+                #if total_cost <= self.limit + self.tolerance:
+                #    theta = self.linesearch(parameters_to_vector(self.policy.parameters()), self.policy, observations, actions,
+                #                        cost_advantage, fullstep, gdotstepdir / lm)
+                #elif total_cost2 <= self.limit2 + self.tolerance:
+                #    theta = self.linesearch(parameters_to_vector(self.policy.parameters()), self.policy, observations, actions,
+                #                        cost_advantage2, fullstep, gdotstepdir / lm)
+                #else:
+                theta = self.linesearch(parameters_to_vector(self.policy.parameters()), self.policy, observations, actions,
+                                    advantage, fullstep, gdotstepdir / lm)
 
                 # Fit the estimated value function to the actual observed discounted rewards
                 ev_before = math_utils.explained_variance_1d(baseline.squeeze(1).cpu().numpy(), discounted_rewards)
-                cost_ev_before = math_utils.explained_variance_1d(cost_baseline.squeeze(1).cpu().numpy(), discounted_costs)
-                cost_ev_before2 = math_utils.explained_variance_1d(cost_baseline2.squeeze(1).cpu().numpy(), discounted_costs2)
+                #cost_ev_before = math_utils.explained_variance_1d(cost_baseline.squeeze(1).cpu().numpy(), discounted_costs)
+                #cost_ev_before2 = math_utils.explained_variance_1d(cost_baseline2.squeeze(1).cpu().numpy(), discounted_costs2)
                 self.value_function.zero_grad()
                 value_fn_params = parameters_to_vector(self.value_function.parameters())
-                self.cost_value_function_1.zero_grad()
-                cost_value_fn_params = parameters_to_vector(self.cost_value_function_1.parameters())
-                self.cost_value_function_2.zero_grad()
-                cost_value_fn_params2 = parameters_to_vector(self.cost_value_function_2.parameters())
+                #self.cost_value_function_1.zero_grad()
+                #cost_value_fn_params = parameters_to_vector(self.cost_value_function_1.parameters())
+                #self.cost_value_function_2.zero_grad()
+                #cost_value_fn_params2 = parameters_to_vector(self.cost_value_function_2.parameters())
 
                 self.value_function.fit(observations, Variable(discounted_rewards_tensor))
-                self.cost_value_function_1.fit(observations, Variable(discounted_costs_tensor))
-                self.cost_value_function_2.fit(observations, Variable(discounted_costs_tensor2))
+                #self.cost_value_function_1.fit(observations, Variable(discounted_costs_tensor))
+                #self.cost_value_function_2.fit(observations, Variable(discounted_costs_tensor2))
 
                 ev_after = math_utils.explained_variance_1d(
                     self.value_function.predict(observations).data.squeeze(1).cpu().numpy(), discounted_rewards)
-                cost_ev_after = math_utils.explained_variance_1d(
-                    self.cost_value_function_1.predict(observations).data.squeeze(1).cpu().numpy(), discounted_costs)
-                cost_ev_after2 = math_utils.explained_variance_1d(
-                    self.cost_value_function_2.predict(observations).data.squeeze(1).cpu().numpy(), discounted_costs2)
+                #cost_ev_after = math_utils.explained_variance_1d(
+                #    self.cost_value_function_1.predict(observations).data.squeeze(1).cpu().numpy(), discounted_costs)
+                #cost_ev_after2 = math_utils.explained_variance_1d(
+                #    self.cost_value_function_2.predict(observations).data.squeeze(1).cpu().numpy(), discounted_costs2)
 
                 if ev_after < ev_before or np.abs(ev_after) < 1e-4:
                     vector_to_parameters(value_fn_params, self.value_function.parameters())
 
-                if cost_ev_after < cost_ev_before or np.abs(cost_ev_after) < 1e-4:
-                    vector_to_parameters(cost_value_fn_params, self.cost_value_function_1.parameters())
+                #if cost_ev_after < cost_ev_before or np.abs(cost_ev_after) < 1e-4:
+                #    vector_to_parameters(cost_value_fn_params, self.cost_value_function_1.parameters())
 
-                if cost_ev_after2 < cost_ev_before2 or np.abs(cost_ev_after2) < 1e-4:
-                    vector_to_parameters(cost_value_fn_params2, self.cost_value_function_2.parameters())
+                #if cost_ev_after2 < cost_ev_before2 or np.abs(cost_ev_after2) < 1e-4:
+                #    vector_to_parameters(cost_value_fn_params2, self.cost_value_function_2.parameters())
 
                 # Update parameters of policy model
                 old_model = copy.deepcopy(self.policy)

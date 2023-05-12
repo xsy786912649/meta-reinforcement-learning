@@ -6,9 +6,9 @@ class DQNSoftmax(nn.Module):
     def __init__(self, input_size, output_size):
         super(DQNSoftmax, self).__init__()
 
-        self.fc1 = nn.Linear(input_size, 128)
-        self.fc2 = nn.Linear(128, 128)
-        self.head = nn.Linear(128, output_size)
+        self.fc1 = nn.Linear(input_size, 64)
+        self.fc2 = nn.Linear(64, 64)
+        self.head = nn.Linear(64, output_size)
         self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x):

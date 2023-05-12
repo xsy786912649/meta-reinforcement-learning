@@ -22,8 +22,8 @@ class MetaSRL:
         ## Initial neural network
         self.policy = DQNSoftmax(input_size, output_size)
         self.value_function = ValueFunctionWrapper(DQNRegressor(input_size), value_function_lr)
-        self.cost_value_function_1 = ValueFunctionWrapper(DQNRegressor(input_size), value_function_lr)
-        self.cost_value_function_2 = ValueFunctionWrapper(DQNRegressor(input_size), value_function_lr)
+        #self.cost_value_function_1 = ValueFunctionWrapper(DQNRegressor(input_size), value_function_lr)
+        #self.cost_value_function_2 = ValueFunctionWrapper(DQNRegressor(input_size), value_function_lr)
 
         self.rewards_by_task = []
         self.cost_1s_by_task = []
@@ -34,14 +34,13 @@ class MetaSRL:
         self.test_cost_2s_by_task = []
         self.average_violations_by_task=[]
         self.test_average_violations_by_task=[]
-        self.task_count = 0
 
     def step(self, eps, height,noise: np.array, crpo_step = 10, crpo_episodes = 10, cg_iters = 10, limit_1 = 50, limit_2 = 50, direction = 0):
         env = AcrobotEnv(noise)
         #self.update_alpha()
         # print(self.cost_value_function_1,self.cost_value_function_2)
         # print(crpo_episodes)
-        crpo = CRPO(env, eps,self.input_size, self.output_size, self.policy, self.value_function, self.cost_value_function_1, self.cost_value_function_2,
+        crpo = CRPO(env, eps,self.input_size, self.output_size, self.policy, self.value_function, None, None,
                     height=height,
                     direction=direction,
                     max_kl=self.alpha,
@@ -67,6 +66,5 @@ class MetaSRL:
         self.cost_2s_by_task.append(cost_2s)
         self.average_violations_by_task.append(violations)
         
-        self.task_count += 1
 
 

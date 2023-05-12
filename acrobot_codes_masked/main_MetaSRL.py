@@ -34,15 +34,10 @@ noises = np.random.normal(0.0, VARIANCE, size=(TRAIN_TASK_COUNT, 4))
 limits = np.random.randint(low=LIMIT_RANGE[0], high=LIMIT_RANGE[1], size=(TRAIN_TASK_COUNT))
 height=None
 for i in range(TRAIN_TASK_COUNT):
-    RUN = i
     # print("Task #{}".format(i))
     noise = noises[i]
     limit = limits[i]
     height=-0.5
-    # if height is None:
-    #     height=-0.5+0.001*i
-    # else:
-    #     height += np.random.normal(0.05,0.001)
     metasrl.step(eps,height, noise=noise, crpo_step=CRPO_STEP_COUNT, crpo_episodes=CRPO_EPISODE_COUNT, cg_iters=CG_ITER_COUNT, limit_1=limit, limit_2=limit, direction=i%2)
     
     plt.plot(metasrl.rewards_by_task[-1], label="Reward")
@@ -55,6 +50,9 @@ for i in range(TRAIN_TASK_COUNT):
     plt.ylabel("Performance")
     plt.show()
 
-    
+    print([para.size() for para in metasrl.policy.parameters()])
+    print([para.size() for para in metasrl.value_function.parameters()])
+
+
 
     
