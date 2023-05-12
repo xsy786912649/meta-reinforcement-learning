@@ -2,17 +2,19 @@ import numpy as np
 from agents.MetaSRL import *
 import matplotlib.pyplot as plt
 import argparse
-# import matplotlib.pyplot as pl
+import random
+import math
+from torch.nn import functional as F
 
-# parser = argparse.ArgumentParser(description='Optional app description')
-# # Optional argument
-# parser.add_argument('--train_task_count', type=int, help='An optional integer argument')
-# parser.add_argument('--crpo_step_count', type=int, help='An optional integer argument')
-# parser.add_argument('--crpo_episode_count', type=int, help='An optional integer argument')
-# parser.add_argument('--run', type=int, help='An optional integer argument')
-# args = parser.parse_args()
 
-# RUN = args.run
+def setup_seed(seed):
+    torch.manual_seed(seed)
+    #torch.cuda.manual_seed_all(seed)
+    np.random.seed(seed)
+    random.seed(seed)
+    #torch.backends.cudnn.deterministic = True
+
+setup_seed(1)
 
 TRAIN_TASK_COUNT = 10# args.train_task_count
 
@@ -53,7 +55,6 @@ for i in range(TRAIN_TASK_COUNT):
     plt.ylabel("Performance")
     plt.show()
 
-    performance = np.array([metasrl.rewards_by_task, metasrl.cost_1s_by_task, metasrl.cost_2s_by_task,metasrl.average_violations_by_task])
-    np.save("results/MetaSRL/performance_data/run_{}_performance_{}.npy".format(RUN,i), performance)
+    
 
     
