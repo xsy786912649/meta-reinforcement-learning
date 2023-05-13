@@ -21,16 +21,16 @@ from torch.nn import functional as F
 
 def setup_seed(seed):
   torch.manual_seed(seed)
-  #torch.cuda.manual_seed_all(seed)
+  torch.cuda.manual_seed_all(seed)
   np.random.seed(seed)
   random.seed(seed)
-  #torch.backends.cudnn.deterministic = True
+  torch.backends.cudnn.deterministic = True
 
 setup_seed(20)
 
 TRAIN_TASK_COUNT = 50# args.train_task_count
 
-CRPO_STEP_COUNT = 20#args.crpo_step_count
+CRPO_STEP_COUNT = 4#args.crpo_step_count
 CRPO_EPISODE_COUNT = 10#args.crpo_episode_count
 CG_ITER_COUNT = 5
 
@@ -99,6 +99,7 @@ if __name__ == '__main__':
     noises = np.random.normal(0.0, VARIANCE, size=(TRAIN_TASK_COUNT, 4))
     limits = np.random.randint(low=LIMIT_RANGE[0], high=LIMIT_RANGE[1], size=(TRAIN_TASK_COUNT))
 
+    '''
     for task_index in range(TRAIN_TASK_COUNT): 
         limit = limits[task_index]
         print(task_index)
@@ -111,7 +112,7 @@ if __name__ == '__main__':
         np.save('results/rewards_test_nonn'+str(task_index)+'.npy', results)
         np.save('results/costs_test_nonn'+str(task_index)+'.npy', violations_test)
         np.save('results/costs2_test_initial_nonn'+str(task_index)+'.npy', violations_test2)
-
+    '''
     Meta_map=torch.load("pth/meta_parameter_map_epho98.pth")
     for task_index in range(TRAIN_TASK_COUNT): 
         limit = limits[task_index]
