@@ -375,7 +375,7 @@ class CRPO:
             new_p = torch.cat(action_dists).gather(1, torch.cat(actions))
             old_p = new_p.detach() + 1e-8
             prob_ratio = new_p / old_p
-            surrogate_loss = -torch.mean(prob_ratio * Variable(advantage,requireds_grad=True)) - (self.ent_coeff * entropy)
+            surrogate_loss = -torch.mean(prob_ratio * Variable(advantage)) - (self.ent_coeff * entropy)
             #cost_surrogate_loss = -torch.mean(prob_ratio * Variable(cost_advantage)) - (self.ent_coeff * entropy)
             #cost_surrogate_loss2 = -torch.mean(prob_ratio * Variable(cost_advantage2)) - (self.ent_coeff * entropy)
 

@@ -113,13 +113,12 @@ if __name__ == '__main__':
         np.save('results/costs_test_nonn'+str(task_index)+'.npy', violations_test)
         np.save('results/costs2_test_initial_nonn'+str(task_index)+'.npy', violations_test2)
     '''
-    Meta_map=torch.load("pth/meta_parameter_map_epho98.pth")
+    meta_parameter_tensor=torch.load("pth/meta_parameter_map_epho98.pth")
     for task_index in range(TRAIN_TASK_COUNT): 
         limit = limits[task_index]
         print(task_index)
         metasrl = MetaSRL(INPUT_SIZE, OUTPUT_SIZE)
-        meta_parameter_tensor=Meta_map.forward(noises[task_index],Meta_map.params) 
-        meta_parameter=[tensor_meta.data.numpy() for tensor_meta in meta_parameter_tensor]
+        meta_parameter=[tensor_meta.detach().data.numpy() for tensor_meta in meta_parameter_tensor]
         meta_parameter_add=[torch.FloatTensor(meta_parameter[i]) for i in range(6)]
         metasrl.policy.fc1.weight.data=meta_parameter_add[0]
         metasrl.policy.fc1.bias.data=meta_parameter_add[1]
@@ -138,13 +137,12 @@ if __name__ == '__main__':
         np.save('results/costs2_test_initial'+str(task_index)+'.npy', violations_test2)
 
 
-    Meta_map=torch.load("pth/meta_parameter_map_epho0.pth")
+    meta_parameter_tensor=torch.load("pth/meta_parameter_map_epho0.pth")
     for task_index in range(TRAIN_TASK_COUNT): 
         limit = limits[task_index]
         print(task_index)
         metasrl = MetaSRL(INPUT_SIZE, OUTPUT_SIZE)
-        meta_parameter_tensor=Meta_map.forward(noises[task_index],Meta_map.params) 
-        meta_parameter=[tensor_meta.data.numpy() for tensor_meta in meta_parameter_tensor]
+        meta_parameter=[tensor_meta.detach().data.numpy() for tensor_meta in meta_parameter_tensor]
         meta_parameter_add=[torch.FloatTensor(meta_parameter[i]) for i in range(6)]
         metasrl.policy.fc1.weight.data=meta_parameter_add[0]
         metasrl.policy.fc1.bias.data=meta_parameter_add[1]
