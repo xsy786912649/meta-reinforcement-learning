@@ -18,7 +18,7 @@ setup_seed(1)
 
 TRAIN_TASK_COUNT = 100# args.train_task_count
 
-CRPO_STEP_COUNT = 5#args.crpo_step_count
+CRPO_STEP_COUNT = 2#args.crpo_step_count
 CRPO_EPISODE_COUNT = 10#args.crpo_episode_count
 CG_ITER_COUNT = 5
 
@@ -41,9 +41,9 @@ if __name__ == '__main__':
     replay_buffer=[]
     replay_buffer_size=10000
 
-    batch_size_task=10
-    epoch_when_each_new=6
-    sample_number=20
+    batch_size_task=3
+    epoch_when_each_new=4
+    sample_number=10
     nosiy_scale=0.001
     nosiy_scale1=0.0003
 
