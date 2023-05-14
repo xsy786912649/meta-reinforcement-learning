@@ -125,36 +125,18 @@ def run(num_tasks, meta_parameter, episodes=5):
     print(results)
 
     return policy_model_out, results, violations
-
-def add_pair(replay_buffer,item,replay_buffer_size):
-  if len(replay_buffer)<replay_buffer_size:
-    replay_buffer.append(item)
-  else:
-    replay_buffer.append(item)
-    replay_buffer=replay_buffer[:-1]
-  return replay_buffer
-
-def sample_pair(replay_buffer,sample_size):
-  if len(replay_buffer)<sample_size:
-    return replay_buffer[:]
-  else:
-    sample_index=random.sample(range(len(replay_buffer)), sample_size)
-    replay_buffer_sample=[replay_buffer[i] for i in sample_index]
-    return replay_buffer_sample
    
 if __name__ == '__main__':
 
-  replay_buffer=[]
-  replay_buffer_size=10000
+  batch_size_task=10
+  epoch_when_each_new=5
+  sample_number=10
+  nosiy_scale=0.1
 
-  batch_size_task=20
-  batch_size_point=20
-  epoch_when_each_new=10
-  nosiy_scale=0.06
-
-  meta_init_data=np.random.normal(loc=0.0, scale=1.0, size=(16,4)) 
+  meta_init_data=np.random.normal(loc=1.0, scale=0.2, size=(16,4)) 
   meta_parameter=torch.FloatTensor(meta_init_data).requires_grad_()
-  optimizer1=torch.optim.Adam(meta_parameter,lr=0.001,weight_decay=0.0)
+  meta_parameter_list=[meta_parameter]
+  optimizer1=torch.optim.Adam(meta_parameter_list,lr=0.001,weight_decay=0.0)
 
   for revealed_task_num in range(100):
     print("------------------------------------")
@@ -170,53 +152,29 @@ if __name__ == '__main__':
         num_tasks_list1=num_tasks_list[0:batch_size_task]
         num_tasks_list=num_tasks_list1
         
-      for task_index in num_tasks_list: 
-        meta_parameter_data=meta_parameter.data.numpy()
-        noisy=np.random.normal(loc=0.0, scale=nosiy_scale, size=(16,4)) 
-        meta_parameter_add_noisy=meta_parameter+noisy 
-        policy_model_out, results, violations = run(task_index,meta_parameter_add_noisy,episodes=5) 
-        #print(meta_parameter)
-        data_pair=(task_index,torch.FloatTensor(meta_parameter_add_noisy),results[-1],task_index+1)
-        replay_buffer=add_pair(replay_buffer,data_pair,replay_buffer_size)
-
-      list_sample=sample_pair(replay_buffer,batch_size_point)
-
       optimizer1.zero_grad()
+      
+      for task_index in num_tasks_list: 
+        meta_parameter_data=meta_parameter.detach().data.numpy()
+        for i in range(sample_number):
+          noisy=np.random.normal(loc=0.0, scale=nosiy_scale, size=(16,4)) 
+          meta_parameter_add_noisy=meta_parameter_data+noisy 
+          policy_model_out, results, violations = run(task_index,meta_parameter_add_noisy,episodes=5) 
+          data_pair1=(noisy/nosiy_scale,results[-1])
 
-      for sample in list_sample:
-        task_index_sample=sample[0]
-        meta_parameter_tensor_sample=sample[1]
-        results_sample=sample[2]
-        task_index_sample_next=sample[3]
+          meta_parameter_add_noisy=meta_parameter_data-noisy 
+          policy_model_out, results, violations = run(task_index,meta_parameter_add_noisy,episodes=5) 
+          data_pair2=(-noisy/nosiy_scale,results[-1])
+          grade=(torch.FloatTensor(data_pair1[0])*data_pair1[1] +torch.FloatTensor(data_pair2[0])*data_pair2[1])/2/sample_number/len(num_tasks_list)
+          
+          if meta_parameter_list[0].grad== None:
+            meta_parameter_list[0].grad=-grade
+          else:
+            meta_parameter_list[0].grad+=-grade
 
-        valueq1=target_Q_meta.forward(task_index_sample_next,next_action,target_Q_meta.params)
-        valueq2=target_Q2_meta.forward(task_index_sample_next,next_action,target_Q2_meta.params)
-        q_value=results_sample+0.0*torch.minimum(valueq1.clone().detach(),valueq2.clone().detach())
-        loss_Q=torch.pow((Q_meta.forward(task_index_sample,meta_parameter_tensor_sample,Q_meta.params)-q_value),2)/float(batch_size_point)
-        loss_Q.backward()
-        loss_Q2=torch.pow((Q2_meta.forward(task_index_sample,meta_parameter_tensor_sample,Q2_meta.params)-q_value),2)/float(batch_size_point)
-        loss_Q2.backward()
+      optimizer1.step()
 
-        action_now=meta_parameter_tensor_sample.detach().clone().requires_grad_()
-        Q_action=Q_meta.forward(task_index_sample,action_now,Q_meta.params)
-        gradient_Q_action=torch.autograd.grad(outputs=Q_action,inputs=action_now)
-        gradient_Q_action=[aa.detach().clone() for aa in gradient_Q_action]
-        action_policypara=-Meta_map.forward(task_index_sample,Meta_map.params)/float(batch_size_point)
-        action_policypara.backward(gradient_Q_action)
-
-      optimizer_Q.step()
-      optimizer_Q2.step()
-      if epoch%2==0:
-        optimizer_action.step()
-        target_Q_meta_paras = [target_Q_meta.params[i]*0.99+Q_meta.params[i]*0.01 for i in range(len(target_Q_meta.params))]
-        target_Q_meta_paras = [para.detach().clone().requires_grad_() for para in target_Q_meta_paras]
-        target_Q_meta.params=target_Q_meta_paras
-        target_Q2_meta_paras = [target_Q2_meta.params[i]*0.99+Q2_meta.params[i]*0.01 for i in range(len(target_Q2_meta.params))]
-        target_Q2_meta_paras = [para.detach().clone().requires_grad_() for para in target_Q2_meta_paras]
-        target_Q2_meta.params=target_Q2_meta_paras
-        target_meta_para = [target_meta.params[i]*0.99+Meta_map.params[i]*0.01 for i in range(len(target_meta.params))]
-        target_meta_para = [para.detach().clone().requires_grad_() for para in target_meta_para] 
-        target_meta.params=target_meta_para
+      
 
     
 

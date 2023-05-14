@@ -39,53 +39,6 @@ for i in range(200):
   map_name = map_name.tolist()
   map_name_list.append(map_name)
 
-class Model(torch.nn.Module):
-  def __init__(self):
-    super(Model, self).__init__()
-    self.params = [
-                torch.Tensor(128, 16).uniform_(-1./math.sqrt(16), 1./math.sqrt(16)).requires_grad_(),
-                torch.Tensor(128).zero_().requires_grad_(),
-
-                torch.Tensor(128, 128).uniform_(-1./math.sqrt(128), 1./math.sqrt(128)).requires_grad_(),
-                torch.Tensor(128).zero_().requires_grad_(),
-
-                torch.Tensor(64, 128).uniform_(-1./math.sqrt(128), 1./math.sqrt(128)).requires_grad_(),
-                torch.Tensor(64).zero_().requires_grad_(),
-
-            ]
-    self.soft=torch.nn.Softmax(dim=1)
-    #self.soft=torch.nn.LogSoftmax(dim=1)
-
-  def dense(self, x, params):
-    y = F.linear(x, params[0], params[1])
-    y = F.relu(y)
-
-    y = F.linear(y, params[2], params[3])
-    y = F.relu(y)
-
-    y = F.linear(y, params[4], params[5])
-
-    return y
-  
-  def forward(self, map_index, params):
-    output=self.dense(self.input_process(map_index), params)
-    output=output.reshape(16,4)
-    output=self.soft(output)
-    return output
-  
-  def input_process(self, map_index):
-    map_name=map_name_list[map_index]
-    map_input=[list(map_row) for map_row in map_name]
-    map_vector=[]
-    for row in map_input:
-        for k in row:
-            if k=='H':
-                map_vector.append(1.0)
-            else:
-                map_vector.append(0.0)
-    map_vector=np.array(map_vector)
-    map_tensor=torch.FloatTensor(map_vector)
-    return map_tensor
 
 def Test(num_tasks, meta_parameter ,episodes=5):
 
@@ -180,29 +133,21 @@ if __name__ == '__main__':
 
   num_tasks =100
 
-  Meta_map=torch.load("pth/meta_parameter_map_epho99.pth")
+  meta_parameter=torch.load("pth/meta_parameter_map_epho99.pth")
+  meta_parameter=meta_parameter.detach().data.numpy()
   for i in range(num_tasks): 
     task_index=i+100
     print(task_index)
-
-    meta_parameter=Meta_map.forward(task_index,Meta_map.params)
-    meta_parameter=meta_parameter.data.numpy()
-    #meta_parameter=np.array([[0,1,1,0],[0,1,1,0],[0,1,1,0],[0,1,0,0],[0,1,1,0],[0,1,1,0],[0,1,1,0],[0,1,0,0],[0,1,1,0],[0,1,1,0],[0,1,1,0],[0,1,0,0],[0,0,1,0],[0,0,1,0],[0,0,1,0],[0,1,1,0]])
-
     policy_model_test, results_test, violations_test = Test(task_index,meta_parameter,episodes=5)
     np.save('maps/Test_task_data/SAC/rewards_test'+str(i)+'.npy', results_test)
     np.save('maps/Test_task_data/SAC/costs_test'+str(i)+'.npy', violations_test)
 
 
-  Meta_map=torch.load("pth/meta_parameter_map_epho0.pth")
+  meta_parameter=torch.load("pth/meta_parameter_map_epho0.pth")
+  meta_parameter=meta_parameter.detach().data.numpy()
   for i in range(num_tasks): 
     task_index=i+100
     print(task_index)
-
-    meta_parameter=Meta_map.forward(task_index,Meta_map.params)
-    meta_parameter=meta_parameter.data.numpy()
-    #meta_parameter=np.array([[0,1,1,0],[0,1,1,0],[0,1,1,0],[0,1,0,0],[0,1,1,0],[0,1,1,0],[0,1,1,0],[0,1,0,0],[0,1,1,0],[0,1,1,0],[0,1,1,0],[0,1,0,0],[0,0,1,0],[0,0,1,0],[0,0,1,0],[0,1,1,0]])
-
     policy_model_test, results_test, violations_test = Test(task_index,meta_parameter,episodes=5)
     np.save('maps/Test_task_data/SAC/rewards_test_initial'+str(i)+'.npy', results_test)
     np.save('maps/Test_task_data/SAC/costs_test_initial'+str(i)+'.npy', violations_test)
