@@ -165,6 +165,7 @@ if __name__ == '__main__':
           meta_parameter_add_noisy=meta_parameter_data-noisy 
           policy_model_out, results, violations = run(task_index,meta_parameter_add_noisy,episodes=5) 
           data_pair2=(-noisy/nosiy_scale,results[-1])
+
           grade=(torch.FloatTensor(data_pair1[0])*data_pair1[1] +torch.FloatTensor(data_pair2[0])*data_pair2[1])/2/sample_number/len(num_tasks_list)
           
           if meta_parameter_list[0].grad== None:
