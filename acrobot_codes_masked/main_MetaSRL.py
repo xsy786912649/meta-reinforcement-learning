@@ -160,7 +160,7 @@ if __name__ == '__main__':
 
     batch_size_task=10
     batch_size_point=10
-    epoch_when_each_new=6
+    epoch_when_each_new=10
     nosiy_scale=0.001#*0.2
     nosiy_scale1=0.0003#*0.2
 

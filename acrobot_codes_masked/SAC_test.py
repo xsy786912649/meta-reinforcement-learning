@@ -30,7 +30,7 @@ setup_seed(20)
 
 TRAIN_TASK_COUNT = 50# args.train_task_count
 
-CRPO_STEP_COUNT = 4#args.crpo_step_count
+CRPO_STEP_COUNT = 10#args.crpo_step_count
 CRPO_EPISODE_COUNT = 10#args.crpo_episode_count
 CG_ITER_COUNT = 5
 
