@@ -18,7 +18,7 @@ setup_seed(1)
 
 TRAIN_TASK_COUNT = 100# args.train_task_count
 
-CRPO_STEP_COUNT = 10#args.crpo_step_count
+CRPO_STEP_COUNT = 5#args.crpo_step_count
 CRPO_EPISODE_COUNT = 10#args.crpo_episode_count
 CG_ITER_COUNT = 5
 
@@ -160,7 +160,7 @@ if __name__ == '__main__':
 
     batch_size_task=10
     batch_size_point=10
-    epoch_when_each_new=10
+    epoch_when_each_new1=10
     nosiy_scale=0.001#*0.2
     nosiy_scale1=0.0003#*0.2
 
@@ -174,6 +174,10 @@ if __name__ == '__main__':
         print(revealed_task_num)
         print("------------------------------------")
         torch.save(Meta_map, "pth/meta_parameter_map_epho"+str(revealed_task_num)+".pth")
+        if revealed_task_num<batch_size_task:
+            epoch_when_each_new=2
+        else:
+            epoch_when_each_new=epoch_when_each_new1
         for epoch in range(epoch_when_each_new):
             num_tasks_list=list(range(revealed_task_num+1))
             if revealed_task_num<batch_size_task:
